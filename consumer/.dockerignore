@@ -1,0 +1,11 @@
+pgdata*/
+*.bak
+.env
+go.sum
+docker-compose.yaml
+*.db
+README.md
+LICENSE
+.gitignore
+rc
+.DS_Store

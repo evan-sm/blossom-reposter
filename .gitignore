@@ -1,0 +1,8 @@
+.env
+go.sum
+.DS_Store
+k8s/config/
+k8s/rabbitmq/install.txt
+producer/rp
+consumer/rc
+data/

@@ -1,0 +1,71 @@
+name: k8s-staging
+
+on:
+  push:
+    branches:
+      - '*'
+      - '!master'
+
+jobs:
+  build:
+    name: Build & push image
+    #needs: [lint, test]
+    env:
+      DOCKER_USER: ${{github.repository_owner}}
+      REF: ${{github.ref}}
+      DCR_URL: docker.pkg.github.com
+      REPOSITORY: wmw9/makaba-reposter
+      VERSION: 1.${{github.run_number}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up variables
+        run: |
+          export DATE="$(date +'%Y-%m-%d')"
+          echo "::set-env name=IMAGE_TAG_PRODUCER::$DCR_URL/$REPOSITORY/makaba-reposter-producer:$VERSION-$DATE-${GITHUB_SHA::8}"
+          echo "::set-env name=IMAGE_TAG_CONSUMER::$DCR_URL/$REPOSITORY/makaba-reposter-consumer:$VERSION-$DATE-${GITHUB_SHA::8}"
+          echo "::set-env name=IMAGE_TAG_PRODUCER_LATEST::$DCR_URL/$REPOSITORY/makaba-reposter-producer:latest"
+          echo "::set-env name=IMAGE_TAG_CONSUMER_LATEST::$DCR_URL/$REPOSITORY/makaba-reposter-consumer:latest"
+      
+      - name: Checkout code
+        uses: actions/checkout@v1
+      
+      - name: Log in to GitHub Packages
+        run: echo ${{github.token}} | docker login $DCR_URL -u $DOCKER_USER --password-stdin
+
+      - name: Build and push a producer Docker image
+        run: |
+          cd $GITHUB_WORKSPACE/producer
+          docker build -t $IMAGE_TAG_PRODUCER_LATEST .
+          docker push $IMAGE_TAG_PRODUCER_LATEST
+          docker build -t $IMAGE_TAG_PRODUCER .
+          docker push $IMAGE_TAG_PRODUCER
+
+      - name: Build and push a consumer Docker image
+        run: |
+          cd $GITHUB_WORKSPACE/consumer
+          docker build -t $IMAGE_TAG_CONSUMER_LATEST .
+          docker push $IMAGE_TAG_CONSUMER_LATEST
+          docker build -t $IMAGE_TAG_CONSUMER .
+          docker push $IMAGE_TAG_CONSUMER
+
+      - name: Update producer k8s deploy image
+        uses: wMw9/kubernetes-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{secrets.KUBE_CONFIG_DATA}}
+        with:
+          args: set image deploy makaba-reposter-producer makaba-reposter-producer=${{env.IMAGE_TAG_PRODUCER}} -n makaba-reposter-staging
+
+      - name: Update consumer k8s deploy image
+        uses: wMw9/kubernetes-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{secrets.KUBE_CONFIG_DATA}}
+        with:
+          args: set image deploy makaba-reposter-consumer makaba-reposter-consumer=${{env.IMAGE_TAG_CONSUMER}} -n makaba-reposter-staging
+
+      - name: kubectl get deploy
+        id: image-list
+        uses: wMw9/kubernetes-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: get deploy -o jsonpath="{..image}"

@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: makaba-reposter-prod
+  name: makaba-reposter-consumer
+  labels:
+    app: makaba-reposter-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: makaba-reposter-consumer
+  template:
+    metadata:
+      labels:
+        app: makaba-reposter-consumer
+    spec:
+      nodeSelector:
+        name: ubuntu-2gb-nbg1-3
+      containers:
+      - name: makaba-reposter-consumer
+        #image: makaba-reposter-consumer:1.0
+        image: docker.pkg.github.com/wmw9/makaba-reposter/makaba-reposter-consumer:latest
+        imagePullPolicy: Always
+        #imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+        envFrom:
+          - configMapRef:
+              name: makaba-reposter-config
+      imagePullSecrets:
+      - name: github-creds

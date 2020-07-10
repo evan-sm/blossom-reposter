@@ -1,0 +1,30 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: makaba-reposter-pgdata-staging-pv
+  labels:
+    type: local
+    app: makaba-reposter
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/home/wmw/git/blossom-bot/reposter/data/pgdata-k8s-staging"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  namespace: makaba-reposter-staging
+  name: makaba-reposter-pgdata-staging-pvc
+  labels:
+    app: makaba-reposter
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi

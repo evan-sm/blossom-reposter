@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: makaba-reposter-staging
+  name: makaba-reposter-producer
+  labels:
+    app: makaba-reposter-producer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: makaba-reposter-producer
+  template:
+    metadata:
+      labels:
+        app: makaba-reposter-producer
+    spec:
+      nodeSelector:
+        name: ubuntu-2gb-nbg1-3
+      containers:
+      - name: makaba-reposter-producer
+        #image: makaba-reposter-producer:1.0
+        image: docker.pkg.github.com/wmw9/makaba-reposter/makaba-reposter-producer:latest
+        imagePullPolicy: Always
+        #imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+        envFrom:
+          - configMapRef:
+              name: makaba-reposter-config
+      imagePullSecrets:
+      - name: github-creds
