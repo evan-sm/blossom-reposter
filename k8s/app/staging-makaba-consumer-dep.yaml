@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: blossom-reposter-staging
+  name: makaba-consumer
+  labels:
+    app: makaba-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: makaba-consumer
+  template:
+    metadata:
+      labels:
+        app: makaba-consumer
+    spec:
+      nodeSelector:
+        name: ubuntu-2gb-nbg1-3
+      containers:
+      - name: makaba-consumer
+        #image: makaba-consumer:1.0
+        image: docker.pkg.github.com/wmw9/blossom-reposter/makaba-consumer:latest
+        imagePullPolicy: Always
+        #imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+        envFrom:
+          - configMapRef:
+              name: blossom-reposter-config
+      imagePullSecrets:
+      - name: github-creds

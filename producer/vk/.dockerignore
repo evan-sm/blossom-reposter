@@ -1,0 +1,12 @@
+pgdata*/
+k8s/
+*.bak
+go.sum
+.env
+docker-compose.yaml
+*.db
+README.md
+LICENSE
+vk
+.github
+.DS_Store

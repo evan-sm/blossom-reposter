@@ -1,10 +1,10 @@
 kind: PersistentVolume
 apiVersion: v1
 metadata:
-  name: makaba-reposter-rabbitmq-prod-pv
+  name: blossom-reposter-rabbitmq-prod-pv
   labels:
     type: local
-    app: makaba-reposter
+    app: blossom-reposter
 spec:
   storageClassName: manual
   capacity:
@@ -17,10 +17,10 @@ spec:
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  namespace: makaba-reposter-prod
-  name: makaba-reposter-rabbitmq-prod-pvc
+  namespace: blossom-reposter-prod
+  name: blossom-reposter-rabbitmq-prod-pvc
   labels:
-    app: makaba-reposter
+    app: blossom-reposter
 spec:
   storageClassName: manual
   accessModes:

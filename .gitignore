@@ -3,6 +3,9 @@ go.sum
 .DS_Store
 k8s/config/
 k8s/rabbitmq/install.txt
-producer/rp
-consumer/rc
+producer/instagram/insta
+producer/vk/vkp
+consumer/makaba/makaba
+consumer/vk/vkc
+consumer/telegram/tg
 data/

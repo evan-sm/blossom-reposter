@@ -1,7 +1,7 @@
 version: '2.1'
 services:
-  rp:
-    build: ./producer
+  ip:
+    build: ./producer/instagram
     restart: on-failure
     #volumes:
     #  - ./consumer:/app
@@ -16,8 +16,24 @@ services:
         condition: service_healthy
       rmq:
         condition: service_healthy
-  rc:
-    build: ./consumer
+  mc:
+    build: ./consumer/makaba
+    restart: on-failure
+    #volumes:
+    #  - ./producer:/app
+    networks:
+      - backend
+    env_file:
+      - ./.env
+        #stdin_open: true
+        #tty: true
+    depends_on:
+      db:
+        condition: service_healthy
+      rmq:
+        condition: service_healthy
+  tgc:
+    build: ./consumer/telegram
     restart: on-failure
     #volumes:
     #  - ./producer:/app

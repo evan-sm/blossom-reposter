@@ -14,17 +14,23 @@ jobs:
       DOCKER_USER: ${{github.repository_owner}}
       REF: ${{github.ref}}
       DCR_URL: docker.pkg.github.com
-      REPOSITORY: wmw9/makaba-reposter
+      REPOSITORY: wmw9/blossom-reposter
       VERSION: 1.${{github.run_number}}
     runs-on: ubuntu-latest
     steps:
       - name: Set up variables
         run: |
           export DATE="$(date +'%Y-%m-%d')"
-          echo "::set-env name=IMAGE_TAG_PRODUCER::$DCR_URL/$REPOSITORY/makaba-reposter-producer:$VERSION-$DATE-${GITHUB_SHA::8}"
-          echo "::set-env name=IMAGE_TAG_CONSUMER::$DCR_URL/$REPOSITORY/makaba-reposter-consumer:$VERSION-$DATE-${GITHUB_SHA::8}"
-          echo "::set-env name=IMAGE_TAG_PRODUCER_LATEST::$DCR_URL/$REPOSITORY/makaba-reposter-producer:latest"
-          echo "::set-env name=IMAGE_TAG_CONSUMER_LATEST::$DCR_URL/$REPOSITORY/makaba-reposter-consumer:latest"
+          echo "::set-env name=IMAGE_INSTAGRAM_PRODUCER::$DCR_URL/$REPOSITORY/instagram-producer:$VERSION-$DATE-${GITHUB_SHA::8}"
+          echo "::set-env name=IMAGE_INSTAGRAM_PRODUCER_LATEST::$DCR_URL/$REPOSITORY/instagram-producer:latest"
+          echo "::set-env name=IMAGE_MAKABA_CONSUMER::$DCR_URL/$REPOSITORY/makaba-consumer:$VERSION-$DATE-${GITHUB_SHA::8}"
+          echo "::set-env name=IMAGE_MAKABA_CONSUMER_LATEST::$DCR_URL/$REPOSITORY/makaba-consumer:latest"
+          echo "::set-env name=IMAGE_TELEGRAM_CONSUMER::$DCR_URL/$REPOSITORY/telegram-consumer:$VERSION-$DATE-${GITHUB_SHA::8}"
+          echo "::set-env name=IMAGE_TELEGRAM_CONSUMER_LATEST::$DCR_URL/$REPOSITORY/telegram-consumer:latest"
+          echo "::set-env name=IMAGE_VK_PRODUCER::$DCR_URL/$REPOSITORY/vk-producer:$VERSION-$DATE-${GITHUB_SHA::8}"
+          echo "::set-env name=IMAGE_VK_PRODUCER_LATEST::$DCR_URL/$REPOSITORY/vk-producer:latest"
+          echo "::set-env name=IMAGE_TWITCH_PRODUCER::$DCR_URL/$REPOSITORY/twitch-producer:$VERSION-$DATE-${GITHUB_SHA::8}"
+          echo "::set-env name=IMAGE_TWITCH_PRODUCER_LATEST::$DCR_URL/$REPOSITORY/twitch-producer:latest"
       
       - name: Checkout code
         uses: actions/checkout@v1
@@ -32,35 +38,80 @@ jobs:
       - name: Log in to GitHub Packages
         run: echo ${{github.token}} | docker login $DCR_URL -u $DOCKER_USER --password-stdin
 
-      - name: Build and push a producer Docker image
+      - name: Build and push instagram producer docker image
         run: |
-          cd $GITHUB_WORKSPACE/producer
-          docker build -t $IMAGE_TAG_PRODUCER_LATEST .
-          docker push $IMAGE_TAG_PRODUCER_LATEST
-          docker build -t $IMAGE_TAG_PRODUCER .
-          docker push $IMAGE_TAG_PRODUCER
+          cd $GITHUB_WORKSPACE/producer/instagram
+          docker build -t $IMAGE_INSTAGRAM_PRODUCER_LATEST .
+          docker push $IMAGE_INSTAGRAM_PRODUCER_LATEST
+          docker build -t $IMAGE_INSTAGRAM_PRODUCER .
+          docker push $IMAGE_INSTAGRAM_PRODUCER
 
-      - name: Build and push a consumer Docker image
+      - name: Build and push vk producer docker image
         run: |
-          cd $GITHUB_WORKSPACE/consumer
-          docker build -t $IMAGE_TAG_CONSUMER_LATEST .
-          docker push $IMAGE_TAG_CONSUMER_LATEST
-          docker build -t $IMAGE_TAG_CONSUMER .
-          docker push $IMAGE_TAG_CONSUMER
+          cd $GITHUB_WORKSPACE/producer/vk
+          docker build -t $IMAGE_VK_PRODUCER_LATEST .
+          docker push $IMAGE_VK_PRODUCER_LATEST
+          docker build -t $IMAGE_VK_PRODUCER .
+          docker push $IMAGE_VK_PRODUCER
 
-      - name: Update producer k8s deploy image
+      - name: Build and push twitch producer docker image
+        run: |
+          cd $GITHUB_WORKSPACE/producer/twitch
+          docker build -t $IMAGE_TWITCH_PRODUCER_LATEST .
+          docker push $IMAGE_TWITCH_PRODUCER_LATEST
+          docker build -t $IMAGE_TWITCH_PRODUCER .
+          docker push $IMAGE_TWITCH_PRODUCER
+
+      - name: Build and push makaba consumer docker image
+        run: |
+          cd $GITHUB_WORKSPACE/consumer/makaba
+          docker build -t $IMAGE_MAKABA_CONSUMER_LATEST .
+          docker push $IMAGE_MAKABA_CONSUMER_LATEST
+          docker build -t $IMAGE_MAKABA_CONSUMER .
+          docker push $IMAGE_MAKABA_CONSUMER
+
+      - name: Build and push telegram consumer docker image
+        run: |
+          cd $GITHUB_WORKSPACE/consumer/telegram
+          docker build -t $IMAGE_TELEGRAM_CONSUMER_LATEST .
+          docker push $IMAGE_TELEGRAM_CONSUMER_LATEST
+          docker build -t $IMAGE_TELEGRAM_CONSUMER .
+          docker push $IMAGE_TELEGRAM_CONSUMER
+
+      - name: Update instagram producer k8s deploy image
         uses: wMw9/kubernetes-action@master
         env:
           KUBE_CONFIG_DATA: ${{secrets.KUBE_CONFIG_DATA}}
         with:
-          args: set image deploy makaba-reposter-producer makaba-reposter-producer=${{env.IMAGE_TAG_PRODUCER}} -n makaba-reposter-staging
+          args: set image deploy instagram-producer instagram-producer=${{env.IMAGE_INSTAGRAM_PRODUCER}} -n blossom-reposter-staging
 
-      - name: Update consumer k8s deploy image
+      - name: Update vk producer k8s deploy image
         uses: wMw9/kubernetes-action@master
         env:
           KUBE_CONFIG_DATA: ${{secrets.KUBE_CONFIG_DATA}}
         with:
-          args: set image deploy makaba-reposter-consumer makaba-reposter-consumer=${{env.IMAGE_TAG_CONSUMER}} -n makaba-reposter-staging
+          args: set image deploy vk-producer vk-producer=${{env.IMAGE_VK_PRODUCER}} -n blossom-reposter-staging
+
+      - name: Update twitch producer k8s deploy image
+        uses: wMw9/kubernetes-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{secrets.KUBE_CONFIG_DATA}}
+        with:
+          args: set image deploy twitch-producer twitch-producer=${{env.IMAGE_TWITCH_PRODUCER}} -n blossom-reposter-staging
+
+      - name: Update makaba consumer k8s deploy image
+        uses: wMw9/kubernetes-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{secrets.KUBE_CONFIG_DATA}}
+        with:
+          args: set image deploy makaba-consumer makaba-consumer=${{env.IMAGE_MAKABA_CONSUMER}} -n blossom-reposter-staging
+
+      - name: Update telegram consumer k8s deploy image
+        uses: wMw9/kubernetes-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{secrets.KUBE_CONFIG_DATA}}
+        with:
+          args: set image deploy telegram-consumer telegram-consumer=${{env.IMAGE_TELEGRAM_CONSUMER}} -n blossom-reposter-staging
 
       - name: kubectl get deploy
         id: image-list

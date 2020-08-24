@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: blossom-reposter-prod
+  name: twitch-producer
+  labels:
+    app: twitch-producer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: twitch-producer
+  template:
+    metadata:
+      labels:
+        app: twitch-producer
+    spec:
+      nodeSelector:
+        name: ubuntu-2gb-nbg1-3
+      containers:
+      - name: twitch-producer
+        #image: twitch-producer:1.0
+        image: docker.pkg.github.com/wmw9/blossom-reposter/twitch-producer:latest
+        imagePullPolicy: Always
+        #imagePullPolicy: Never
+        ports:
+        - containerPort: 9696
+        envFrom:
+          - configMapRef:
+              name: blossom-reposter-config
+      imagePullSecrets:
+      - name: github-creds
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: blossom-reposter-prod
+  name: twitch-producer
+spec:
+  type: LoadBalancer
+  selector:
+    app: twitch-producer
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9696
+      targetPort: 9696
