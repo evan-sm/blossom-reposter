@@ -27,6 +27,9 @@ func getCatalog() ([]byte, string, string) {
 	case "gabi":
 		keyword = "самых ламповых"
 		board = "fag"
+	case "olyashaa":
+		keyword = "ляша"
+		board = "fag"
 	default:
 		keyword = `навальный \ролл /ролл`
 		board = "test"
