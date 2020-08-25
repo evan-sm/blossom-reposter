@@ -140,9 +140,9 @@ func getPersonsDB() []*Person {
 	return persons
 }
 
-func getPersonDB() []*Person {
+func findPersonDB(id string) []*Person {
 	// SELECT * FROM people WHERE enabled = true;
-	db.Where("twitch_id = ?", streamChangedJSON.Data[0].UserID).First(&persons)
+	db.Where("twitch_id = ?", id).First(&persons)
 	/*for _, s := range persons {
 		log.Println(s)
 	}*/

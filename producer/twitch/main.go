@@ -206,7 +206,7 @@ func (j *streamChangedPayload) composeJSONPayload(s *Person) {
 }
 
 func (j *streamChangedPayload) sendAnnounce() {
-	getPersonDB()
+	findPersonDB(j.Data[0].UserID)
 	for _, s := range persons {
 		if s.Announce_twitch_live {
 			j.composeJSONPayload(s)
