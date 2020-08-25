@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+    "math/rand"
 
 	"github.com/gin-gonic/gin"
 	"github.com/k0kubun/pp"
@@ -199,6 +200,8 @@ func (j *streamChangedPayload) composeJSONPayload(s *Person) {
 	url := j.Data[0].ThumbnailURL
 	url = strings.Replace(url, "{width}", "1280", -1)
 	url = strings.Replace(url, "{height}", "720", -1)
+    randomString := RandStringBytes(9)
+    url = fmt.Sprintf("%v?%v", url, randomString)
 	files = append(files, url) // add .jpg to slice
 
 	jsonPayload.Files = files
@@ -255,4 +258,12 @@ func sendJSONPayload() bool {
 	}
 	log.Printf(" [x] Sent to rMQ")
 	return true
+}
+
+func RandStringBytes(n int) string {
+    b := make([]byte, n)
+    for i := range b {
+        b[i] = charset[rand.Int63() % int64(len(charset))]
+    }
+    return string(b)
 }
