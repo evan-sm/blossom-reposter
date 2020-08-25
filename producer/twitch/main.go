@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"strings"
 	"time"
-    "math/rand"
 
 	"github.com/gin-gonic/gin"
 	"github.com/k0kubun/pp"
@@ -70,7 +70,7 @@ func serve() {
 
 	})
 
-    // API endpoint
+	// API endpoint
 	router.POST("/webhook/userfollows", func(c *gin.Context) {
 		var json userFollowsPayload
 		if err := c.BindJSON(&json); err != nil {
@@ -198,10 +198,8 @@ func (j *streamChangedPayload) composeJSONPayload(s *Person) {
 
 	files = nil
 	url := j.Data[0].ThumbnailURL
-	url = strings.Replace(url, "{width}", "1280", -1)
-	url = strings.Replace(url, "{height}", "720", -1)
-    randomString := RandStringBytes(9)
-    url = fmt.Sprintf("%v?%v", url, randomString)
+	url = strings.Replace(url, "{width}", "1920", -1)
+	url = strings.Replace(url, "{height}", "1080", -1)
 	files = append(files, url) // add .jpg to slice
 
 	jsonPayload.Files = files
@@ -258,12 +256,4 @@ func sendJSONPayload() bool {
 	}
 	log.Printf(" [x] Sent to rMQ")
 	return true
-}
-
-func RandStringBytes(n int) string {
-    b := make([]byte, n)
-    for i := range b {
-        b[i] = charset[rand.Int63() % int64(len(charset))]
-    }
-    return string(b)
 }

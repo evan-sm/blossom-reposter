@@ -25,5 +25,4 @@ const (
 	twitchWebhookURL   = "https://api.twitch.tv/helix/webhooks/hub"
 	userFollowsTopic   = "https://api.twitch.tv/helix/users/follows?first=1&to_id=" // "https://api.twitch.tv/helix/users/follows?first=1&to_id=172230472"
 	streamChangedTopic = "https://api.twitch.tv/helix/streams?user_id="             // "https://api.twitch.tv/helix/streams?user_id=172230472"
-    charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
