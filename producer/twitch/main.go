@@ -46,9 +46,8 @@ func getTwitchOAuth() {
 		log.Printf("resp: %v\nbody: %v\nerrs: %v\n", resp, rbody, errs)
 		reportTg(errs)
 	}
-	pp.Println(appAccessTkn)
 	TwitchOAuthTkn = fmt.Sprintf("Bearer %v", appAccessTkn.AccessToken)
-	pp.Println(TwitchOAuthTkn)
+    pp.Printf("New app access token: %v\n", TwitchOAuthTkn)
 }
 
 func serve() {
@@ -76,10 +75,8 @@ func serve() {
 			log.Printf("ShouldBindJSON error: %v", err.Error())
 			c.JSON(http.StatusBadRequest, gin.H{"status": err.Error()})
 		}
-		//log.Printf("new follower\n")
 		pp.Printf("[%v]: new follower %v\n", json.Data[0].ToName, json.Data[0].FromName)
 		pp.Printf("%v", json.Data[0])
-		//log.Printf("%v %v", json.Data[0].FollowedAt, json.Data[0].FromName)
 		c.String(http.StatusOK, "ok")
 	})
 
@@ -92,32 +89,28 @@ func serve() {
 			reportTg(err.Error())
 			return
 		}
-		//var j streamChangedPayload
 		log.Printf("%v\n", len(json.Data))
 		if len(json.Data) == 0 {
-			log.Printf("Empty webhook, skip.")
 			c.String(http.StatusOK, "ok")
+			log.Println("Stream went offline")
 			return
 		}
 		pp.Println(json.Data[0])
 
 		log.Printf("StreamID: %v\njson.Data[0].ID: %v\n", streamID, json.Data[0].ID)
 		if twitchNotificationID == c.GetHeader("Twitch-Notification-Id") {
-			log.Printf("Same notification ID: %v. Skip!", twitchNotificationID)
 			c.String(http.StatusOK, "ok")
-			//reportTg("Same notification ID. Skip!")
+			log.Printf("Same notification ID: %v. Skip!", twitchNotificationID)
 			return
 		}
 		if streamID == json.Data[0].ID {
 			c.String(http.StatusOK, "ok")
-			pp.Println("Stream changed info")
-			pp.Println(json.Data[0])
+            pp.Printf("Stream changed info: %v", json.Data[0])
 			return
 		}
 		if twitchNotificationID != c.GetHeader("Twitch-Notification-Id") {
 			c.String(http.StatusOK, "ok")
 			twitchNotificationID = c.GetHeader("Twitch-Notification-Id")
-			log.Printf("%v", twitchNotificationID)
 			log.Printf("%v goes live! Playing %v. '%v'\n", json.Data[0].UserName, json.Data[0].GameID, json.Data[0].Title)
 			json.sendAnnounce()
 		}
@@ -135,14 +128,11 @@ func subscribe(id int64, topic string) {
 	case userFollowsTopic:
 		topic = fmt.Sprintf("%v%v", topic, id)
 		CallbackURL = fmt.Sprintf("%v/webhook/userfollows", CallbackHost)
-		pp.Printf("Topic: %v\nCallback URL: %v\n", topic, CallbackURL)
 	case streamChangedTopic:
 		topic = fmt.Sprintf("%v%v", topic, id)
 		CallbackURL = fmt.Sprintf("%v/webhook/streamchanged", CallbackHost)
-		pp.Printf("Topic: %v\nCallback URL: %v\n", topic, CallbackURL)
 	}
 
-	pp.Println(topic)
 	body := subscribeBody{}
 	body.Mode = "subscribe"
 	body.Callback = CallbackURL
@@ -156,7 +146,7 @@ func subscribe(id int64, topic string) {
 	if errs != nil {
 		log.Printf("resp: %v\nbody: %v\nerrs: %v", resp, respBody, errs)
 	}
-	log.Printf("resp: %v\nbody: %v\nerrs: %v", resp, respBody, errs)
+	log.Printf("resp: %v\n", resp.Status)
 }
 
 func subscribeWebHooks() {
