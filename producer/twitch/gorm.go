@@ -123,6 +123,11 @@ type streamChangedPayload struct {
 	} `json:"data"`
 }
 
+type UserOnline struct {
+	Name string
+	Time int
+}
+
 var persons []*Person
 var files []string
 var appAccessTkn AppAccessToken
@@ -130,6 +135,7 @@ var streamChangedJSON streamChangedPayload
 var jsonPayload JsonPayload
 var db *gorm.DB
 var twitchNotificationID, streamID string
+var usr []UserOnline
 
 func getPersonsDB() []*Person {
 	// SELECT * FROM people WHERE enabled = true;

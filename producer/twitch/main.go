@@ -22,8 +22,8 @@ func main() {
 		getPersonsDB()
 		getTwitchOAuth()
 		subscribeWebHooks()
-		log.Printf("⏳ Next webhook resubscribe is in 2 hours")
-		time.Sleep(7200 * time.Second)
+		log.Printf("⏳ Next webhook resubscribe is in 4 hours")
+		time.Sleep(14400 * time.Second)
 	}
 }
 
@@ -47,7 +47,7 @@ func getTwitchOAuth() {
 		reportTg(errs)
 	}
 	TwitchOAuthTkn = fmt.Sprintf("Bearer %v", appAccessTkn.AccessToken)
-    pp.Printf("New app access token: %v\n", TwitchOAuthTkn)
+	pp.Printf("New app access token: %v\n", TwitchOAuthTkn)
 }
 
 func serve() {
@@ -105,14 +105,17 @@ func serve() {
 		}
 		if streamID == json.Data[0].ID {
 			c.String(http.StatusOK, "ok")
-            pp.Printf("Stream changed info: %v", json.Data[0])
+			pp.Printf("Stream changed info: %v", json.Data[0])
 			return
 		}
 		if twitchNotificationID != c.GetHeader("Twitch-Notification-Id") {
 			c.String(http.StatusOK, "ok")
 			twitchNotificationID = c.GetHeader("Twitch-Notification-Id")
 			log.Printf("%v goes live! Playing %v. '%v'\n", json.Data[0].UserName, json.Data[0].GameID, json.Data[0].Title)
-			json.sendAnnounce()
+			b := ShouldWeSend(json.Data[0].UserName)
+			if b {
+				json.sendAnnounce()
+			}
 		}
 		streamID = json.Data[0].ID
 		twitchNotificationID = c.GetHeader("Twitch-Notification-Id")
@@ -125,7 +128,7 @@ func subscribe(id int64, topic string) {
 	var CallbackURL string
 
 	switch topic {
-	case userFollowsTopic:
+	case userFollowsTmeopic:
 		topic = fmt.Sprintf("%v%v", topic, id)
 		CallbackURL = fmt.Sprintf("%v/webhook/userfollows", CallbackHost)
 	case streamChangedTopic:
@@ -207,6 +210,27 @@ func (j *streamChangedPayload) sendAnnounce() {
 			}
 		}
 	}
+}
+
+func ShouldWeSend(name string) bool {
+	found := false
+	for i := range usr {
+		if usr[i].Name == name {
+			delta := time.Now().Unix() - usr[i].Time
+			fmt.Printf("delta: %v\n", delta)
+			if delta > 14400 {
+				fmt.Printf("It's been 4 hours since last webhook was received\n")
+				usr[i].Time = time.Now().Unix()
+				fmt.Printf("%v found. Time is %v\n", usr[i].Name, usr[i].Time)
+				return true
+			} else {
+				fmt.Printf("Announce was sent recently for %v. Skip.", name)
+				return false
+			}
+		}
+	}
+	usr = append(usr, UserOnline{Name: name, Time: time.Now().Unix()})
+	return true
 }
 
 func sendJSONPayload() bool {
