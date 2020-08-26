@@ -213,7 +213,6 @@ func (j *streamChangedPayload) sendAnnounce() {
 }
 
 func ShouldWeSend(name string) bool {
-	found := false
 	for i := range usr {
 		if usr[i].Name == name {
 			delta := time.Now().Unix() - usr[i].Time
@@ -229,6 +228,7 @@ func ShouldWeSend(name string) bool {
 			}
 		}
 	}
+    fmt.Printf("%v not found in UserOnline struct.", name)
 	usr = append(usr, UserOnline{Name: name, Time: time.Now().Unix()})
 	return true
 }
