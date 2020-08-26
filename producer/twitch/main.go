@@ -128,7 +128,7 @@ func subscribe(id int64, topic string) {
 	var CallbackURL string
 
 	switch topic {
-	case userFollowsTmeopic:
+	case userFollowsTopic:
 		topic = fmt.Sprintf("%v%v", topic, id)
 		CallbackURL = fmt.Sprintf("%v/webhook/userfollows", CallbackHost)
 	case streamChangedTopic:

@@ -125,7 +125,7 @@ type streamChangedPayload struct {
 
 type UserOnline struct {
 	Name string
-	Time int
+	Time int64
 }
 
 var persons []*Person
