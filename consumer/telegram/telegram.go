@@ -52,6 +52,10 @@ func repostTg() {
 			log.Printf("Got post: %v\nFrom: %v", caption, jsonPayload.Source)
 			caption = fmt.Sprintf("%v\n\n🔗<a href=\"%v\">VK Post</a>", caption, jsonPayload.Source)
 			sendMediaGroup(caption)
+		case "public":
+			log.Printf("Got public post: %v\nFrom: %v", caption, jsonPayload.Source)
+			caption = fmt.Sprintf("%v\n\n🔗<a href=\"%v\">VK Public</a>", caption, jsonPayload.Source)
+			sendMediaGroup(caption)
 		}
 	case "ig":
 		log.Println("Got post from IG")
@@ -76,9 +80,9 @@ func repostTg() {
 		switch jsonPayload.Type {
 		case "live":
 			if jsonPayload.Caption == "" {
-				caption = fmt.Sprintf("🔗<a href=\"%v\">Стрим начался!</a>", jsonPayload.Source)
+				caption = fmt.Sprintf("🔗<a href=\"%v\">Стрим запустился!</a>", jsonPayload.Source)
 			} else {
-				caption = fmt.Sprintf("%v\n\n🔗<a href=\"%v\">Стрим начался!</a>", caption, jsonPayload.Source)
+                caption = fmt.Sprintf("Заголовок стрима: \"%v\"\n\n🔗<a href=\"%v\">Стрим запустился!</a>", caption, jsonPayload.Source)
 			}
 			sendMediaGroup(caption)
 		}

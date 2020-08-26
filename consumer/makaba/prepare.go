@@ -33,6 +33,14 @@ func prepareBase(board string, thread string) map[string]io.Reader {
 				comment = fmt.Sprintf("%v> %v", comment, caption)
 			}
 			log.Printf("Caption: \"%v\"", comment)
+		case "public":
+			comment = fmt.Sprintf("[sup]%v ⛓[/sup]\n\n", jsonPayload.Source)
+			if jsonPayload.Caption != "" {
+				caption = strings.Replace(jsonPayload.Caption, "\n", "\n> ", -1)
+				caption = strings.Replace(caption, "\n> ⠀\n> ", "\n\n> ", -1)
+				comment = fmt.Sprintf("%v> %v", comment, caption)
+			}
+			log.Printf("Caption: \"%v\"", comment)
 		}
 	case "ig":
 		log.Println("Got post from IG")
@@ -58,11 +66,11 @@ func prepareBase(board string, thread string) map[string]io.Reader {
 		log.Println("Got post from twitch")
 		switch jsonPayload.Type {
 		case "live":
-			comment = fmt.Sprintf("[sup]Стрим начался! %v ⛓[/sup]\n\n", jsonPayload.Source)
+			comment = fmt.Sprintf("[sup]Стрим запустился! %v ⛓[/sup]\n\n", jsonPayload.Source)
 			if jsonPayload.Caption != "" {
 				caption = strings.Replace(jsonPayload.Caption, "\n", "\n> ", -1)
 				caption = strings.Replace(caption, "\n> ⠀\n> ", "\n\n> ", -1)
-				comment = fmt.Sprintf("%v> %v", comment, caption)
+				comment = fmt.Sprintf("%vЗаголовок стрима: \n> \"%v\"", comment, caption)
 			}
 			log.Printf("Caption: \"%v\"", comment)
 		}
