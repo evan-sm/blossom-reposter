@@ -1,12 +1,11 @@
 <h1 align="center">
   <img src="https://raw.githubusercontent.com/wMw9/makaba-reposter/master/assets/img/post_sample.png" alt="Blossom Reposter"></a>
-  <br>
 </h1>
 <p align="center">Monitors & reposts activities from popular social networks to telegram and /fag/</a></p>
+  <br>
 Blossom-Reposter
 ================
-### "Best friend for telegram channel owners"
-
+Best friend for telegram channel owners.
 Managing your telegram channels and stalking your waifus has never been as fun nor easier than this. It comes with features like:
 
 * Save instagram posts and stories leaving no trace
@@ -16,9 +15,7 @@ Managing your telegram channels and stalking your waifus has never been as fun n
 * more to come
 ## Scheme
   <br>
-  <img src="https://raw.githubusercontent.com/wMw9/makaba-reposter/master/assets/img/reposter_scheme.svg" alt="Reposter Scheme"></a>
-
-
+  <img src="https://raw.githubusercontent.com/wMw9/makaba-reposter/master/assets/img/reposter_scheme.svg" alt="Reposter Scheme">
 ## Installation
 This is a personal project wasn't meant for public use. If you have questions how to configurate or install you should find it yourself
 There are 3 ways of starting this service up. Classic way, docker-compose or Kubernetes.
