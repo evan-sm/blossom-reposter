@@ -217,7 +217,7 @@ func ShouldWeSend(name string) bool {
 		if usr[i].Name == name {
 			delta := time.Now().Unix() - usr[i].Time
 			fmt.Printf("delta: %v\n", delta)
-			if delta > 14400 {
+			if delta > 36000 {
 				fmt.Printf("It's been 4 hours since last webhook was received\n")
 				usr[i].Time = time.Now().Unix()
 				fmt.Printf("%v found. Time is %v\n", usr[i].Name, usr[i].Time)
@@ -228,7 +228,7 @@ func ShouldWeSend(name string) bool {
 			}
 		}
 	}
-    fmt.Printf("%v not found in UserOnline struct.", name)
+	fmt.Printf("%v not found in UserOnline struct.", name)
 	usr = append(usr, UserOnline{Name: name, Time: time.Now().Unix()})
 	return true
 }
