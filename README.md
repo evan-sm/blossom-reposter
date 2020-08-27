@@ -1,10 +1,8 @@
 <h1 align="center">
-  <img src="https://raw.githubusercontent.com/wMw9/makaba-reposter/master/assets/img/post_sample.png" alt="Blossom Reposter"></a>
+  <img src="https://raw.githubusercontent.com/wMw9/makaba-reposter/master/assets/img/post_sample.png" alt="Blossom Reposter">
 </h1>
-<p align="center">Monitors & reposts activities from popular social networks to telegram and /fag/</a></p>
-  <br>
-Blossom-Reposter
-================
+<p align="center">Monitors & reposts activities from popular social networks to telegram and /fag/</p>
+<h1 align="center">Blossom-Reposter</h1>
 Best friend for telegram channel owners.
 Managing your telegram channels and stalking your waifus has never been as fun nor easier than this. It comes with features like:
 
