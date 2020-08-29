@@ -79,7 +79,7 @@ func WallGet(id int64) {
 	}
 
 	// Skip cycle if both js["attachments"] not present and "js["text"]" is empty.
-	if txt := gjson.Get(js.String(), "text").String(); txt == "" && !gjson.Get(js.String(), "attachments").Exists() {
+	if txt := gjson.Get(js.String(), "text").String(); txt == "" && !gjson.Get(js.String(), "attachments").Exists() || gjson.Get(js.String(), "copy_history").Exists() {
 		log.Println("Skip. js['attachments'] not present and js['text'] is empty.")
 		updateVkTimestamp(id)
 	}

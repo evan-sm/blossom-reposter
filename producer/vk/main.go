@@ -72,6 +72,7 @@ func composeJSONPayload(s *Person) {
 	jsonPayload.VkPageID = s.Vk_page_id
 	jsonPayload.DvachBoard = "fag"
 	jsonPayload.From = "vk"
+	jsonPayload.Files = files
 }
 
 func sendJSONPayload() bool {
