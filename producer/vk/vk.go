@@ -82,12 +82,14 @@ func WallGet(id int64) {
 	if gjson.Get(js.String(), "copy_history").Exists() {
 		log.Println("Repost. Skip.")
 		updateVkTimestamp(id)
+		return
 	}
 
 	// Skip cycle if both js["attachments"] not present and "js["text"]" is empty.
 	if txt := gjson.Get(js.String(), "text").String(); txt == "" && !gjson.Get(js.String(), "attachments").Exists() {
 		log.Println("Skip. js['attachments'] not present and js['text'] is empty.")
 		updateVkTimestamp(id)
+		return
 	}
 
 	log.Printf("js: %v\n\n", js)
