@@ -43,7 +43,7 @@ func checkSN() {
 		if s.Check_instagram_post == true {
 			checkInstagramPost()
 		}
-		if s.Check_instagram_post == true {
+		if s.Check_instagram_story == true {
 			checkInstagramStory()
 		}
 	}

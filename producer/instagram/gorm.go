@@ -17,23 +17,33 @@ type Person struct {
 	Check_instagram_post  bool `gorm:"default:true"`
 	Check_instagram_story bool `gorm:"default:true"`
 	Check_vk_page         bool `gorm:"default:false"`
+	Check_vk_status       bool `gorm:"default:false"`
 	Check_vk_public       bool `gorm:"default:false"`
 
-	Telegram_chan_id   int64
-	Instagram_username string
-	Instagram_id       int64
-	Vk_page_id         int64
-	Vk_public_id       int64
-
+	Telegram_chan_id        int64
+	Twitch_username         string
+	Twitch_id               int64
+	Instagram_username      string
+	Instagram_id            int64
+	Vk_page_id              int64
+	Vk_public_id            int64
 	Repost_telegram_chan_id int64
-	Repost_telegram_enabled bool `gorm:"default:false"`
-	Repost_makaba_enabled   bool `gorm:"default:false"`
+
+	Repost_telegram_enabled  bool `gorm:"default:false"`
+	Repost_makaba_enabled    bool `gorm:"default:false"`
+	Repost_vk_page_enabled   bool `gorm:"default:false"`
+	Repost_vk_public_enabled bool `gorm:"default:false"`
+	Repost_vk_status_enabled bool `gorm:"default:false"`
+	Announce_twitch_live     bool `gorm:"default:false"`
 
 	Telegram_chan_id_timestamp int64 `sql:"DEFAULT:extract(epoch from now())"`
 	Instagram_story_timestamp  int64 `sql:"DEFAULT:extract(epoch from now())"`
 	Instagram_post_timestamp   int64 `sql:"DEFAULT:extract(epoch from now())"`
 	Vk_page_timestamp          int64 `sql:"DEFAULT:extract(epoch from now())"`
+	Vk_status_timestamp        int64 `sql:"DEFAULT:extract(epoch from now())"`
 	Vk_public_timestamp        int64 `sql:"DEFAULT:extract(epoch from now())"`
+
+	Vk_status_text string
 }
 
 var db *gorm.DB
