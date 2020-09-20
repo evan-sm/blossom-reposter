@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/elazarl/goproxy v0.0.0-20200809112317-0581fc3aee2d // indirect
+	github.com/isayme/go-amqp-reconnect v0.0.0-20180930040740-e71660afb5ca // indirect
 	github.com/k0kubun/pp v3.0.1+incompatible
 	github.com/mattn/go-colorable v0.1.7 // indirect
 	github.com/parnurzeal/gorequest v0.2.16
