@@ -17,4 +17,5 @@ var (
 	amqpUrl   = os.Getenv("AMQP_URL") // amqp://guest:guest@localhost:5672/
 	tgBotTkn  = os.Getenv("TG_BOT_TKN")
 	tgChanErr = os.Getenv("TG_CHAN_ERR")
+	socketUrl = os.Getenv("SOCKET_URL")
 )

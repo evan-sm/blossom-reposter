@@ -15,6 +15,7 @@ var (
 	tgBotTkn          = os.Getenv("TG_BOT_TKN")
 	tgChanErr         = os.Getenv("TG_CHAN_ERR")
 	vkAccessTkn       = os.Getenv("VK_ACCESS_TKN")
+	socketUrl         = os.Getenv("SOCKET_URL")
 )
 
 const (

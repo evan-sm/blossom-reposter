@@ -2,14 +2,34 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
+	"os"
 	"time"
 
-	"github.com/streadway/amqp"
+	"go.nanomsg.org/mangos/v3"
+	"go.nanomsg.org/mangos/v3/protocol/pub"
+
+	// register transports
+	_ "go.nanomsg.org/mangos/v3/transport/all"
 )
 
+var sock mangos.Socket
+
 func main() {
+	var err error
+
+	log.Println(socketUrl)
+	if sock, err = pub.NewSocket(); err != nil {
+		die("can't get new pub socket: %s", err)
+	}
+	socketUrl = "tcp://localhost:40899"
+	if err = sock.Listen(socketUrl); err != nil {
+		die("can't listen on pub socket: %s", err.Error())
+	}
+
 	initDB()
+
 	for {
 		getPersonsDB()
 		checkSN()
@@ -76,49 +96,21 @@ func composeJSONPayload(s *Person) {
 }
 
 func sendJSONPayload() bool {
-	conn, err := amqp.Dial(amqpUrl)
-	failOnError(err, "Failed to connect to RabbitMQ")
-	defer conn.Close()
-
-	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
-	defer ch.Close()
-
-	/* 	q, err := ch.QueueDeclare(
-	   		"vk",
-	   		true,
-	   		false,
-	   		false,
-	   		false,
-	   		nil,
-	   	)
-	   	failOnError(err, "Failed to declare a queue") */
-
-	err = ch.ExchangeDeclare(
-		"logs",   // name
-		"fanout", // type
-		true,     // durable
-		false,    // auto-deleted
-		false,    // internal
-		false,    // no-wait
-		nil,      // arguments
-	)
-	failOnError(err, "Failed to declare an exchange")
-
 	body, _ := json.Marshal(jsonPayload)
-	err = ch.Publish(
-		"logs", // exchange
-		"",     // routing key
-		false,  // mandatory
-		false,  // immediate
-		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(body),
-		})
-	if err != nil {
-		log.Printf("%s", err)
-		return false
+
+	if err := sock.Send([]byte(body)); err != nil {
+		die("Failed publishing: %s", err.Error())
 	}
-	log.Printf(" [x] Sent to rMQ")
+	log.Printf(" [x] Sent via tcp socket")
+
 	return true
+}
+
+func die(format string, v ...interface{}) {
+	fmt.Fprintln(os.Stderr, fmt.Sprintf(format, v...))
+	os.Exit(1)
+}
+
+func date() string {
+	return time.Now().Format(time.ANSIC)
 }
