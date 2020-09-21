@@ -5,28 +5,19 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"reflect"
 	"time"
 
-	"go.nanomsg.org/mangos/v3"
-	"go.nanomsg.org/mangos/v3/protocol/pub"
-
-	// register transports
-	_ "go.nanomsg.org/mangos/v3/transport/all"
+	"github.com/wmw9/blossom-reposter/pkg/pubsub"
 )
 
-var sock mangos.Socket
+
+var s pubsub.ServerSocket
 
 func main() {
-	var err error
-
-	log.Println(socketUrl)
-	if sock, err = pub.NewSocket(); err != nil {
-		die("can't get new pub socket: %s", err)
-	}
-	socketUrl = "tcp://localhost:40899"
-	if err = sock.Listen(socketUrl); err != nil {
-		die("can't listen on pub socket: %s", err.Error())
-	}
+	s = pubsub.NewServerSocket()
+	fmt.Println(reflect.TypeOf(s))
+	s.ServerInit(socketURL, "vk producer")
 
 	initDB()
 
@@ -48,25 +39,25 @@ func failOnError(err error, msg string) {
 
 func checkSN() {
 	// Iterate through each person
-	for _, s := range persons {
-		log.Printf("Checking %s's VK...", s.Person)
+	for _, v := range persons {
+		log.Printf("Checking %s's VK...", v.Person)
 		//UsersGet()
-		if s.Repost_vk_page_enabled {
-			composeJSONPayload(s)
-			if s.Check_vk_page == true {
-				WallGet(s.Vk_page_id)
+		if v.Repost_vk_page_enabled {
+			composeJSONPayload(v)
+			if v.Check_vk_page == true {
+				WallGet(v.Vk_page_id)
 			}
 		}
-		if s.Repost_vk_public_enabled {
-			composeJSONPayload(s)
-			if s.Check_vk_public == true {
-				WallGet(s.Vk_public_id)
+		if v.Repost_vk_public_enabled {
+			composeJSONPayload(v)
+			if v.Check_vk_public == true {
+				WallGet(v.Vk_public_id)
 			}
 		}
-		if s.Repost_vk_status_enabled {
-			composeJSONPayload(s)
-			if s.Check_vk_status == true {
-				UsersGet(s.Vk_page_id, s.Vk_status_text)
+		if v.Repost_vk_status_enabled {
+			composeJSONPayload(v)
+			if v.Check_vk_status == true {
+				UsersGet(v.Vk_page_id, v.Vk_status_text)
 			}
 		}
 	}
@@ -96,11 +87,9 @@ func composeJSONPayload(s *Person) {
 }
 
 func sendJSONPayload() bool {
-	body, _ := json.Marshal(jsonPayload)
+	body, _ := json.Marshal(&jsonPayload)
+	s.ServerSend(body)
 
-	if err := sock.Send([]byte(body)); err != nil {
-		die("Failed publishing: %s", err.Error())
-	}
 	log.Printf(" [x] Sent via tcp socket")
 
 	return true

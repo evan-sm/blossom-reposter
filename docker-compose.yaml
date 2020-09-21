@@ -49,7 +49,7 @@ services:
       rmq:
         condition: service_healthy
   db:
-    image: postgres:12.3-alpine
+    image: postgres:12.4-alpine
     restart: unless-stopped
     networks:
       - backend

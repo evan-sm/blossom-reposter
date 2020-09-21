@@ -121,9 +121,9 @@ func getPersonsDB() []*Person {
 
 func initDB() {
 	var err error
-	dbUri := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable password=%s",
-		POSTGRES_HOST, POSTGRES_USER, POSTGRES_DB, POSTGRES_PASSWORD)
-	//log.Printf("%s", dbUri)
+	dbUri := fmt.Sprintf("host=%s user=%s port=%s dbname=%s sslmode=disable password=%s",
+		POSTGRES_HOST, POSTGRES_USER, POSTGRES_PORT, POSTGRES_DB, POSTGRES_PASSWORD_2)
+	fmt.Printf("%s", dbUri)
 	db, err = gorm.Open("postgres", dbUri)
 	if err != nil {
 		reportTg("failed to connect database")

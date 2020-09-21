@@ -15,6 +15,9 @@ require (
 	github.com/streadway/amqp v1.0.0
 	github.com/stretchr/testify v1.6.1 // indirect
 	github.com/tidwall/gjson v1.6.0
+	github.com/wmw9/blossom-reposter/pkg/pubsub v0.0.0-00010101000000-000000000000
 	go.nanomsg.org/mangos/v3 v3.0.2
 	moul.io/http2curl v1.0.0 // indirect
 )
+
+replace github.com/wmw9/blossom-reposter/pkg/pubsub => /home/wmw/git/blossom-bot/reposter/pkg/pubsub
