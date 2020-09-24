@@ -30,7 +30,7 @@ func repostTg() {
 	log.Println("Reposting to telegram")
 	var caption string
 
-	log.Printf("Caption length: %v", len(jsonPayload.Caption))
+	//log.Printf("Caption length: %v", len(jsonPayload.Caption))
 	if len(jsonPayload.Caption) > 1004 {
 		log.Printf("%v characters. Caption is long.  I'll cut it!", len(jsonPayload.Caption))
 		caption = fmt.Sprintf("%v ... <a href=\"%v\">more</a>", jsonPayload.Caption[:1004], jsonPayload.Source)
@@ -41,19 +41,18 @@ func repostTg() {
 
 	switch jsonPayload.From {
 	case "vk":
-		log.Println("Got post from VK")
 		switch jsonPayload.Type {
 		case "status":
-			log.Printf("Got status: %v\nFrom: %v", caption, jsonPayload.Source)
+			log.Printf("Got VK status: %v\nFrom: %v", caption, jsonPayload.Source)
 			caption = fmt.Sprintf("✏️<b><a href=\"%v\">VK статус</a>:</b> %v", jsonPayload.Source, caption)
 			log.Printf("Caption: %v", caption)
 			sendMessage(caption)
 		case "post":
-			log.Printf("Got post: %v\nFrom: %v", caption, jsonPayload.Source)
+			log.Printf("Git VK post: %v\nFrom: %v", caption, jsonPayload.Source)
 			caption = fmt.Sprintf("%v\n\n🔗<a href=\"%v\">VK Post</a>", caption, jsonPayload.Source)
 			sendMediaGroup(caption)
 		case "public":
-			log.Printf("Got public post: %v\nFrom: %v", caption, jsonPayload.Source)
+			log.Printf("Got VK public post: %v\nFrom: %v", caption, jsonPayload.Source)
 			caption = fmt.Sprintf("%v\n\n🔗<a href=\"%v\">VK Public</a>", caption, jsonPayload.Source)
 			sendMediaGroup(caption)
 		}

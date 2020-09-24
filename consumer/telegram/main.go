@@ -12,7 +12,6 @@ import (
 
 )
 
-//var c pubsub.ClientSocket
 
 func main() {
     consume()
@@ -20,7 +19,7 @@ func main() {
 
 func consume() {
     c := pubsub.NewClientSocket()
-	c.ClientInit(socketUrl, "telegram consumer")
+	c.ClientInit(socketUrl, "Telegram Consumer")
 
     var err error
     var msg []byte
@@ -29,7 +28,6 @@ func consume() {
         if msg, err = c.ClientStart(); err != nil {
             die("Cannot recv: %s", err.Error())
         }
-        log.Printf("Received a message: %s", msg)
 
 		if err = json.Unmarshal(msg, &jsonPayload); err != nil {
     		log.Println(err, jsonPayload)
@@ -44,11 +42,10 @@ func consume() {
 			log.Printf("Reposting to Telegram is disabled: %v", jsonPayload.RepostTelegramEnabled)
 		}
 
-		log.Println("Sleep for 2 sec...")
-		time.Sleep(2 * time.Second)
+		log.Println("Sleep for a sec...")
+		time.Sleep(time.Second)
     }
 }
-
 
 func die(format string, v ...interface{}) {
 	fmt.Fprintln(os.Stderr, fmt.Sprintf(format, v...))

@@ -36,6 +36,7 @@ func NewClientSocket() ClientSocket {
 
 func (c *ClientSocket) ClientStart() ([]byte, error) {
 	var err error
+	log.Printf("%v [*] Waiting for messages. To exit press CTRL+C", c.name)
 	if c.msg, err = c.sock.Recv(); err != nil {
 		die("Cannot recv: %s", err.Error())
 	}
@@ -73,14 +74,13 @@ func (s *ServerSocket) ServerInit(url string, name string) {
 	if err = s.sock.Listen(url); err != nil {
 		die("can't listen on pub socket: %s", err.Error())
 	}
-	log.Println("Initialized server")
 }
 
 func (s *ServerSocket) ServerSend(body []byte) {
 	if err := s.sock.Send([]byte(body)); err != nil {
 		die("Failed publishing: %s", err.Error())
 	}
-	log.Println(" [x] Sent via tcp socket")
+	log.Println(" [x] Sent via TCP")
 }
 
 func die(format string, v ...interface{}) {
