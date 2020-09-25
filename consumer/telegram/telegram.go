@@ -109,7 +109,7 @@ func sendMessage(s string) {
 	//log.Printf("%v", string(sjson))
 	log.Printf("%v", query)
 	resp, body, errs := gorequest.New().Get(url).Query(query).End()
-	log.Printf("%v\n%v\n%v", errs, resp, body)
+	log.Printf("%v\n\n%v\n\n%v", errs, resp, body)
 
 }
 

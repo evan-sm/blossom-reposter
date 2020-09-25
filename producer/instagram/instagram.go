@@ -11,22 +11,133 @@ import (
 	"github.com/anaskhan96/soup"
 	"github.com/parnurzeal/gorequest"
 	"github.com/tidwall/gjson"
+    //"github.com/wmw9/blossom-reposter/pkg/pubsub"
+    "github.com/wmw9/blossom-reposter/pkg/database"
+    "github.com/k0kubun/pp"
+    //    "github.com/jinzhu/gorm"
 )
 
-func clearJSONPayload() {
-	/* 	jsonPayload.Timestamp = 0
-	   	jsonPayload.Person = ""
-	   	jsonPayload.Type = ""
-	   	jsonPayload.Source = ""
-	   	jsonPayload.RepostTelegram = false
-	   	jsonPayload.Repost2Ch = false
-	   	jsonPayload.DvachBoard = ""
-	   	jsonPayload.Files = jsonPayload.Files[:0]
-	   	files = files[:0]
-	   	jsonPayload.Caption = "" */
-	storyJson = nil
-	jsonPayload = JsonPayload{}
-	files = nil
+
+func checkInstagramPost(v *database.User) {
+    clearJSON() // Wipe it from last Unmarshal 
+    jsonPayload = database.ComposeJSONPayload(v, "ig")
+	jsonPayload.Type = "post"
+    pp.Println(jsonPayload)
+	log.Printf("Checking %v's profile json for posts...", jsonPayload.InstagramUsername)
+
+	js := extractJsonFromProfilePage(jsonPayload.InstagramUsername)
+	if js == "" {
+        log.Printf("%v IG posts is empty: %v", js, jsonPayload.InstagramUsername)
+		reportTg(js)
+		return
+	}
+	//log.Printf("\nfull js:\n%s\n\n", js)
+
+	gjspath := fmt.Sprintf(`entry_data.ProfilePage.0.graphql.user.edge_owner_to_timeline_media.edges.@reverse.#(node.taken_at_timestamp>%v).node.shortcode`, jsonPayload.InstagramPostTimestamp) // 592655783)
+	shortcode := gjson.Get(js, gjspath).String()
+	if shortcode == "" {
+		//log.Printf("shortcode: %v", shortcode)
+		log.Printf("Cannot get shortcode, skipping...: %v", shortcode)
+		return
+	}
+    log.Printf("Shortcode: %v Post timestamp: %v\n", shortcode, jsonPayload.InstagramPostTimestamp)
+	time.Sleep(5 * time.Second)
+
+	jspage, multi, timestamp, caption := extractJsonFromPostPage(shortcode)
+	if jspage == "" {
+		log.Printf("%v No new IG posts", jsonPayload.InstagramUsername)
+		time.Sleep(2 * time.Second)
+		return
+	}
+	jsonPayload.Source = fmt.Sprintf("https://instagram.com/p/%v", shortcode)
+//	log.Printf("post json:\n\n%v %v", jspage, multi)
+
+	extractFilesFromJson(jspage, multi)
+
+	// Prepare JsonPayload files
+	jsonPayload.Files = files
+	jsonPayload.Timestamp = timestamp
+	jsonPayload.Caption = caption
+	pp.Println(jsonPayload)
+    if sent := sendJSONPayload(); sent {
+		log.Printf("Mark it in DB")
+        database.UpdateIGPostTimestampDB(db, jsonPayload.Person, jsonPayload.Timestamp)
+	}
+	log.Printf("Sleep for a sec")
+	time.Sleep(1 * time.Second)
+
+}
+
+func checkInstagramStory(v *database.User) {
+    clearJSON() // Wipe it from last Unmarshal 
+    jsonPayload = database.ComposeJSONPayload(v, "ig")
+
+	jsonPayload.Type = "story"
+	//jsonPayload.Caption = ""
+	
+    jsonPayload.Source = fmt.Sprintf("https://instagram.com/stories/%v", jsonPayload.InstagramUsername)
+	log.Printf("Checking %v's stories... person: %v; timestamp: %v", jsonPayload.InstagramUsername, jsonPayload.Person, jsonPayload.InstagramStoryTimestamp)
+	url := fmt.Sprintf(`https://i.instagram.com/api/v1/feed/user/%v/story/`, jsonPayload.InstagramID)
+	//log.Printf("url: %v", url)
+	req := gorequest.New()
+	resp, body, errs := req.Get(url).
+		Set("user-agent", "Instagram 10.26.0 (iPhone7,2; iOS 10_1_1; en_US; en-US; scale=2.00; gamut=normal; 750x1334) AppleWebKit/420+").
+		Set("cookie", IGSessionID).
+		Retry(4, 1200*time.Second, http.StatusBadRequest, http.StatusInternalServerError, http.StatusTooManyRequests).End()
+	//log.Printf("%v", body)
+	//log.Printf("resp: %v", resp.Status)
+	if errs != nil {
+		log.Printf("%v %v %v", url, resp.Status, errs)
+		reportTg(errs)
+	}
+
+	jsonPayload.Timestamp = gjson.Get(body, "reel.latest_reel_media").Int()
+	log.Printf("Last story timestamp from DB: %v; Post timestamp: %v ", jsonPayload.InstagramStoryTimestamp, jsonPayload.Timestamp)
+	if jsonPayload.InstagramStoryTimestamp >= jsonPayload.Timestamp {
+		log.Printf("📭 New stories not found.")
+		time.Sleep(10 * time.Second)
+		return
+	}
+	result := gjson.Get(body, "reel.items")
+	//log.Printf("%v", result.String())
+	if err := json.Unmarshal([]byte(result.String()), &storyJson); err != nil {
+		log.Println("err:", err)
+	}
+	// files = nil // clear previous files
+	for _, v := range storyJson {
+		log.Printf("proccessing %v: DB timestamp: %v vs Story timestamp: %v",
+			v.Code, jsonPayload.InstagramStoryTimestamp, v.TakenAt)
+		log.Printf("Files count: %v", len(files))
+		if jsonPayload.InstagramStoryTimestamp < v.TakenAt && len(files) != 4 {
+			jsonPayload.Timestamp = v.TakenAt
+			if v.StoryCta != nil {
+				if v.StoryCta[0].Links[0].WebURI != "" {
+					jsonPayload.Caption = ""
+					jsonPayload.Caption = fmt.Sprintf("Swipe up ⤴️: %v", v.StoryCta[0].Links[0].WebURI)
+					log.Printf("%v", jsonPayload.Caption)
+				}
+			}
+			if v.MediaType == 1 {
+				log.Printf("🖼   jpg found \"%v\"; appending to []files",
+					v.ImageVersions2.Candidates[0].URL)
+				files = append(files, v.ImageVersions2.Candidates[0].URL)
+			}
+			if v.MediaType == 2 {
+				log.Printf("📹 mp4 found \"%v\"; appending to []files",
+					v.VideoVersions[0].URL)
+				files = append(files, v.VideoVersions[0].URL)
+			}
+		}
+	}
+	// Prepare JsonPayload files
+	jsonPayload.Files = files
+	pp.Println(jsonPayload)
+    if sent := sendJSONPayload(); sent {
+		log.Printf("Mark it in DB")
+        database.UpdateIGStoryTimestampDB(db, jsonPayload.Person, jsonPayload.Timestamp)
+	}
+	time.Sleep(5 * time.Second)
+
 }
 
 func extractJsonFromProfilePage(username string) string {
@@ -122,142 +233,3 @@ func extractFilesFromJson(js string, multi bool) {
 
 }
 
-func checkInstagramPost() {
-	files = nil
-	//clearJSONPayload()
-
-	//jsonPayload.Person = person
-	jsonPayload.Type = "post"
-	jsonPayload.From = "ig"
-
-	//jsonPayload.RepostTelegramEnabled = true
-	//jsonPayload.RepostTelegramChanID = tg
-	//jsonPayload.RepostMakabaEnabled = true
-	//jsonPayload.DvachBoard = "fag"
-
-	log.Printf("Checking %v's profile json for posts...", jsonPayload.InstagramUsername)
-
-	js := extractJsonFromProfilePage(jsonPayload.InstagramUsername)
-	if js == "" {
-		log.Printf("js is empty, something went wrong: %v", js)
-		reportTg(js)
-		return
-	}
-	//log.Printf("\nfull js:\n%s\n\n", js)
-
-	gjspath := fmt.Sprintf(`entry_data.ProfilePage.0.graphql.user.edge_owner_to_timeline_media.edges.@reverse.#(node.taken_at_timestamp>%v).node.shortcode`, jsonPayload.InstagramPostTimestamp) // 592655783)
-	shortcode := gjson.Get(js, gjspath).String()
-	if shortcode == "" {
-		//log.Printf("shortcode: %v", shortcode)
-		log.Printf("Couldn't get shortcode, skipping...: %v", shortcode)
-		return
-	}
-	log.Printf("shortcode: %v", shortcode)
-	log.Printf("t: %v", jsonPayload.InstagramPostTimestamp)
-	log.Printf("⏱Sleep for 10 sec\n")
-	time.Sleep(10 * time.Second)
-
-	jspage, multi, timestamp, caption := extractJsonFromPostPage(shortcode)
-	if jspage == "" {
-		log.Printf("%v new posts not found", jsonPayload.InstagramUsername)
-		time.Sleep(2 * time.Second)
-		return
-	}
-	jsonPayload.Source = fmt.Sprintf("https://instagram.com/p/%v", shortcode)
-	log.Printf("post json:\n\n%v %v", jspage, multi)
-
-	extractFilesFromJson(jspage, multi)
-
-	// Prepare JsonPayload files
-	jsonPayload.Files = files
-	jsonPayload.Timestamp = timestamp
-	jsonPayload.Caption = caption
-	log.Println(jsonPayload)
-	sent := sendJsonPayload()
-	if sent {
-		log.Printf("JsonPayload sent to RabbitMQ, updating DB last post timestamp")
-		db.Model(&persons).Where("person = ?", jsonPayload.Person).Update("instagram_post_timestamp", jsonPayload.Timestamp)
-	}
-	log.Printf("Sleep for a few secs for rate-limits")
-	time.Sleep(1 * time.Second)
-
-}
-
-func checkInstagramStory() {
-	files = nil
-	jsonPayload.Type = "story"
-	jsonPayload.From = "ig"
-	jsonPayload.Caption = ""
-	//clearJSONPayload()
-	//jsonPayload.Person = person
-	//jsonPayload.RepostTelegramEnabled = true
-	//jsonPayload.RepostTelegramChanID = tg
-	//jsonPayload.RepostMakabaEnabled = true
-	//jsonPayload.DvachBoard = "fag"
-	jsonPayload.Source = fmt.Sprintf("https://instagram.com/stories/%v", jsonPayload.InstagramUsername)
-	log.Printf("Checking %v's stories... person: %v; timestamp: %v", jsonPayload.InstagramUsername, jsonPayload.Person, jsonPayload.InstagramStoryTimestamp)
-	url := fmt.Sprintf(`https://i.instagram.com/api/v1/feed/user/%v/story/`, jsonPayload.InstagramID)
-	//log.Printf("url: %v", url)
-	req := gorequest.New()
-	resp, body, errs := req.Get(url).
-		Set("user-agent", "Instagram 10.26.0 (iPhone7,2; iOS 10_1_1; en_US; en-US; scale=2.00; gamut=normal; 750x1334) AppleWebKit/420+").
-		Set("cookie", IGSessionID).
-		Retry(4, 1200*time.Second, http.StatusBadRequest, http.StatusInternalServerError, http.StatusTooManyRequests).End()
-	//log.Printf("%v", body)
-	//log.Printf("resp: %v", resp.Status)
-	if errs != nil {
-		log.Printf("%v %v %v", url, resp.Status, errs)
-		reportTg(errs)
-	}
-
-	jsonPayload.Timestamp = gjson.Get(body, "reel.latest_reel_media").Int()
-	log.Printf("Last story timestamp from DB: %v; Post timestamp: %v ", jsonPayload.InstagramStoryTimestamp, jsonPayload.Timestamp)
-	if jsonPayload.InstagramStoryTimestamp >= jsonPayload.Timestamp {
-		log.Printf("📭 New stories not found.")
-		time.Sleep(10 * time.Second)
-		return
-	}
-	result := gjson.Get(body, "reel.items")
-	//log.Printf("%v", result.String())
-	if err := json.Unmarshal([]byte(result.String()), &storyJson); err != nil {
-		log.Println("err:", err)
-	}
-	// files = nil // clear previous files
-	for _, v := range storyJson {
-		log.Printf("proccessing %v: DB timestamp: %v vs Story timestamp: %v",
-			v.Code, jsonPayload.InstagramStoryTimestamp, v.TakenAt)
-		log.Printf("Files count: %v", len(files))
-		if jsonPayload.InstagramStoryTimestamp < v.TakenAt && len(files) != 4 {
-			jsonPayload.Timestamp = v.TakenAt
-			if v.StoryCta != nil {
-				if v.StoryCta[0].Links[0].WebURI != "" {
-					jsonPayload.Caption = ""
-					jsonPayload.Caption = fmt.Sprintf("Swipe up ⤴️: %v", v.StoryCta[0].Links[0].WebURI)
-					log.Printf("%v", jsonPayload.Caption)
-				}
-			}
-			if v.MediaType == 1 {
-				log.Printf("🖼   jpg found \"%v\"; appending to files slice",
-					v.ImageVersions2.Candidates[0].URL)
-				files = append(files, v.ImageVersions2.Candidates[0].URL)
-			}
-			if v.MediaType == 2 {
-				log.Printf("📹 mp4 found \"%v\"; appending to files slice",
-					v.VideoVersions[0].URL)
-				files = append(files, v.VideoVersions[0].URL)
-			}
-		}
-	}
-	// Prepare JsonPayload files
-	jsonPayload.Files = files
-	log.Println(jsonPayload)
-	sent := sendJsonPayload()
-	if sent {
-		log.Printf("JsonPayload sent to RabbitMQ, updating DB last post timestamp")
-		db.Model(&persons).Where("person = ?", jsonPayload.Person).
-			Update("instagram_story_timestamp", jsonPayload.Timestamp)
-	}
-	log.Printf("Sleep for a few secs for rate-limits")
-	time.Sleep(10 * time.Second)
-
-}

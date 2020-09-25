@@ -14,4 +14,5 @@ var (
 	POSTGRES_HOST     = os.Getenv("POSTGRES_HOST")
 	tgBotTkn          = os.Getenv("TG_BOT_TKN")
 	tgChanErr         = os.Getenv("TG_CHAN_ERR")
+	socketURL           = os.Getenv("SOCKET_URL")
 )
