@@ -9,9 +9,11 @@ import (
 	"time"
 
 	"github.com/wmw9/blossom-reposter/pkg/pubsub"
+	"github.com/wmw9/blossom-reposter/pkg/database"
 
 )
 
+var jsonPayload database.JsonPayload
 
 func main() {
     consume()
@@ -37,7 +39,7 @@ func consume() {
 
 		if jsonPayload.RepostTelegramEnabled {
 			repostTg()
-			jsonPayload = JsonPayload{}
+			jsonPayload = database.JsonPayload{}
 		} else {
 			log.Printf("Reposting to Telegram is disabled: %v", jsonPayload.RepostTelegramEnabled)
 		}

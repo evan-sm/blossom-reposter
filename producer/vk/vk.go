@@ -119,7 +119,7 @@ func WallGet(id int64, v *database.User) {
 	jsonPayload.Caption = vkPost.Text
 	jsonPayload.Type = "post"
 	jsonPayload.Source = fmt.Sprintf("https://vk.com/wall%v_%v", vkPost.FromID, vkPost.ID)
-	pp.Print(vkPost)
+	//pp.Print(vkPost)
 	pp.Print(jsonPayload)
     if sent := sendJSONPayload(); sent {
         database.UpdateVKTimestampDB(db, id, jsonPayload.Person, vkPost.Date)

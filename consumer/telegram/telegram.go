@@ -19,6 +19,15 @@ type InputMedia struct {
 	ParseMode string `json:"parse_mode"`
 }
 
+// Query for telegram sendMessage method
+type SendMessagePayload struct {
+	ChatID                int64  `json:"chat_id"`
+	Text                  string `json:"text"`
+	ParseMode             string `json:"parse_mode"`
+	DisableWebPagePreview bool   `json:"disable_web_page_preview"`
+}
+
+
 func reportTg(e interface{}) {
 	log.Printf("%v", e)
 	url := fmt.Sprintf("https://api.telegram.org/bot%v/sendMessage", tgBotTkn)

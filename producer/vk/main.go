@@ -7,11 +7,18 @@ import (
 //	"os"
 	//"reflect"
 	"time"
-    //"github.com/jinzhu/gorm"
 	"github.com/wmw9/blossom-reposter/pkg/pubsub"
     "github.com/wmw9/blossom-reposter/pkg/database"
+    "github.com/jinzhu/gorm"
 )
 
+
+var files []string
+var status database.Status
+var vkPost database.VKPost
+var s pubsub.ServerSocket
+var db *gorm.DB
+var jsonPayload database.JsonPayload
 
 func main() {
 	s = pubsub.NewServerSocket()
@@ -53,7 +60,7 @@ func checkSN() {
 func clearJSON() {
 	jsonPayload = database.JsonPayload{}
 	files = nil
-    status = Status{} 
+    status = database.Status{} 
 }
 
 func sendJSONPayload() bool {

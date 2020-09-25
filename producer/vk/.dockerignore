@@ -2,6 +2,7 @@ pgdata*/
 k8s/
 *.bak
 go.sum
+go.mod
 .env
 docker-compose.yaml
 *.db

@@ -10,9 +10,12 @@ require (
 	github.com/parnurzeal/gorequest v0.2.16
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/smartystreets/goconvey v1.6.4 // indirect
+	github.com/wmw9/blossom-reposter/pkg/database v0.0.0-00010101000000-000000000000 // indirect
 	github.com/wmw9/blossom-reposter/pkg/pubsub v0.0.0-00010101000000-000000000000
 	golang.org/x/net v0.0.0-20200904194848-62affa334b73 // indirect
 	moul.io/http2curl v1.0.0 // indirect
 )
 
 replace github.com/wmw9/blossom-reposter/pkg/pubsub => /home/wmw/git/blossom-bot/reposter/pkg/pubsub
+
+replace github.com/wmw9/blossom-reposter/pkg/database => /home/wmw/git/blossom-bot/reposter/pkg/database

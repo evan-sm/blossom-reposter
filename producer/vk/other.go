@@ -27,9 +27,6 @@ func die(format string, v ...interface{}) {
 	os.Exit(1)
 }
 
-//func date() string {
-//	return time.Now().Format(time.ANSIC)
-//}
 
 func failOnError(err error, msg string) {
 	if err != nil {
