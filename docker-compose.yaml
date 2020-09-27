@@ -25,6 +25,9 @@ services:
       - ./.env
         #stdin_open: true
         #tty: true
+    depends_on:
+      producer:
+        condition: service_healthy
   db:
     image: postgres:12.4-alpine
     restart: unless-stopped

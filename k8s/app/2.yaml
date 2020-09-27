@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: blossom-reposter-staging
+  name: producer
+  labels:
+    app: producer
+spec:
+  replicas: 1
+  hostname: producer
+  subdomain: talk
+  selector:
+    matchLabels:
+      app: producer
+  template:
+    metadata:
+      labels:
+        app: producer
+    spec:
+      nodeSelector:
+        name: ubuntu-2gb-nbg1-3
+      containers:
+      - name: producer
+        image: producer:1.0
+        #image: docker.pkg.github.com/wmw9/blossom-reposter/producer:latest
+        #imagePullPolicy: Always
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 40899
+        envFrom:
+          - configMapRef:
+              name: blossom-reposter-config
+      imagePullSecrets:
+      - name: github-creds
+

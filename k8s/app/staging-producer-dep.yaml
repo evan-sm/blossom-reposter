@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: blossom-reposter-staging
+  name: producer
+  labels:
+    app: producer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: producer
+  template:
+    metadata:
+      labels:
+        app: producer
+    spec:
+      nodeSelector:
+        name: ubuntu-2gb-nbg1-3
+      containers:
+      - name: producer
+        image: producer:1.0
+        #image: docker.pkg.github.com/wmw9/blossom-reposter/producer:latest
+        #imagePullPolicy: Always
+        imagePullPolicy: Never
+        ports:
+          - containerPort: 40899
+            protocol: TCP
+        envFrom:
+          - configMapRef:
+              name: blossom-reposter-config
+      imagePullSecrets:
+      - name: github-creds
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: producer
+  namespace: blossom-reposter-staging
+  labels:
+    app: producer
+spec:
+  selector:
+    app: producer
+    #app.kubernetes.io/name: ingress-nginx
+    #app.kubernetes.io/part-of: ingress-nginx
+  type: LoadBalancer
+  ports:
+    - name: tcp-port
+      port: 40899
+      targetPort: 40899
+      protocol: TCP
