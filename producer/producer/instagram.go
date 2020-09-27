@@ -11,23 +11,23 @@ import (
 	"github.com/anaskhan96/soup"
 	"github.com/parnurzeal/gorequest"
 	"github.com/tidwall/gjson"
-    //"github.com/wmw9/blossom-reposter/pkg/pubsub"
-    "github.com/wmw9/blossom-reposter/pkg/database"
-    "github.com/k0kubun/pp"
-    //    "github.com/jinzhu/gorm"
+
+	//"github.com/wmw9/blossom-reposter/pkg/pubsub"
+	"github.com/k0kubun/pp"
+	"github.com/wmw9/blossom-reposter/pkg/database"
+	//    "github.com/jinzhu/gorm"
 )
 
-
 func checkInstagramPost(v *database.User) {
-    clearJSON() // Wipe it from last Unmarshal 
-    jsonPayload = database.ComposeJSONPayload(v, "ig")
+	clearJSON() // Wipe it from last Unmarshal
+	jsonPayload = database.ComposeJSONPayload(v, "ig")
 	jsonPayload.Type = "post"
-    pp.Println(jsonPayload)
+	pp.Println(jsonPayload)
 	log.Printf("Checking %v's profile json for posts...", jsonPayload.InstagramUsername)
 
 	js := extractJsonFromProfilePage(jsonPayload.InstagramUsername)
 	if js == "" {
-        log.Printf("%v IG posts is empty: %v", js, jsonPayload.InstagramUsername)
+		log.Printf("%v IG posts is empty: %v", js, jsonPayload.InstagramUsername)
 		reportTg(js)
 		return
 	}
@@ -40,7 +40,7 @@ func checkInstagramPost(v *database.User) {
 		log.Printf("Cannot get shortcode, skipping...: %v", shortcode)
 		return
 	}
-    log.Printf("Shortcode: %v Post timestamp: %v\n", shortcode, jsonPayload.InstagramPostTimestamp)
+	log.Printf("Shortcode: %v Post timestamp: %v\n", shortcode, jsonPayload.InstagramPostTimestamp)
 	time.Sleep(5 * time.Second)
 
 	jspage, multi, timestamp, caption := extractJsonFromPostPage(shortcode)
@@ -50,7 +50,7 @@ func checkInstagramPost(v *database.User) {
 		return
 	}
 	jsonPayload.Source = fmt.Sprintf("https://instagram.com/p/%v", shortcode)
-//	log.Printf("post json:\n\n%v %v", jspage, multi)
+	//	log.Printf("post json:\n\n%v %v", jspage, multi)
 
 	extractFilesFromJson(jspage, multi)
 
@@ -59,9 +59,9 @@ func checkInstagramPost(v *database.User) {
 	jsonPayload.Timestamp = timestamp
 	jsonPayload.Caption = caption
 	pp.Println(jsonPayload)
-    if sent := sendJSONPayload(); sent {
+	if sent := sendJSONPayload(); sent {
 		log.Printf("Mark it in DB")
-        database.UpdateIGPostTimestampDB(db, jsonPayload.Person, jsonPayload.Timestamp)
+		database.UpdateIGPostTimestampDB(db, jsonPayload.Person, jsonPayload.Timestamp)
 	}
 	log.Printf("Sleep for a sec")
 	time.Sleep(1 * time.Second)
@@ -69,13 +69,13 @@ func checkInstagramPost(v *database.User) {
 }
 
 func checkInstagramStory(v *database.User) {
-    clearJSON() // Wipe it from last Unmarshal 
-    jsonPayload = database.ComposeJSONPayload(v, "ig")
+	clearJSON() // Wipe it from last Unmarshal
+	jsonPayload = database.ComposeJSONPayload(v, "ig")
 
 	jsonPayload.Type = "story"
 	//jsonPayload.Caption = ""
-	
-    jsonPayload.Source = fmt.Sprintf("https://instagram.com/stories/%v", jsonPayload.InstagramUsername)
+
+	jsonPayload.Source = fmt.Sprintf("https://instagram.com/stories/%v", jsonPayload.InstagramUsername)
 	log.Printf("Checking %v's stories... person: %v; timestamp: %v", jsonPayload.InstagramUsername, jsonPayload.Person, jsonPayload.InstagramStoryTimestamp)
 	url := fmt.Sprintf(`https://i.instagram.com/api/v1/feed/user/%v/story/`, jsonPayload.InstagramID)
 	//log.Printf("url: %v", url)
@@ -132,9 +132,9 @@ func checkInstagramStory(v *database.User) {
 	// Prepare JsonPayload files
 	jsonPayload.Files = files
 	pp.Println(jsonPayload)
-    if sent := sendJSONPayload(); sent {
+	if sent := sendJSONPayload(); sent {
 		log.Printf("Mark it in DB")
-        database.UpdateIGStoryTimestampDB(db, jsonPayload.Person, jsonPayload.Timestamp)
+		database.UpdateIGStoryTimestampDB(db, jsonPayload.Person, jsonPayload.Timestamp)
 	}
 	time.Sleep(5 * time.Second)
 
@@ -232,4 +232,3 @@ func extractFilesFromJson(js string, multi bool) {
 	}
 
 }
-

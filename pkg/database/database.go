@@ -2,7 +2,7 @@ package database
 
 import (
 	"fmt"
-    "reflect"
+	"reflect"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -105,8 +105,7 @@ type JsonPayload struct {
 	Caption                 string   `json:"caption"`
 }
 
-
-type ShortcodeJson struct {
+type ShortcodeJSON struct {
 	ID           string `json:"id"`
 	Shortcode    string `json:"shortcode"`
 	MediaPreview string `json:"media_preview"`
@@ -116,7 +115,7 @@ type ShortcodeJson struct {
 	IsVideo      bool   `json:"is_video"`
 }
 
-type StoryJson struct {
+type StoryJSON struct {
 	TakenAt        int64  `json:"taken_at"`
 	MediaType      int64  `json:"media_type"`
 	Code           string `json:"code"`
@@ -177,7 +176,6 @@ var status Status
 var vkPost VKPost
 var db *gorm.DB
 
-
 func GetUsersDB(db *gorm.DB) []*User {
 	// SELECT * FROM people WHERE enabled = true;
 	//db.Where("enabled = ?", "true").Find(&persons)
@@ -190,18 +188,18 @@ func GetUsersDB(db *gorm.DB) []*User {
 }
 
 func UpdateVKStatusDB(db *gorm.DB, id int64, status string) {
-    db.Model(&users).Where("vk_page_id = ?", id).
-    Update("vk_status_text", status)
+	db.Model(&users).Where("vk_page_id = ?", id).
+		Update("vk_status_text", status)
 }
 
 func UpdateIGPostTimestampDB(db *gorm.DB, person string, date int64) {
-    db.Model(&users).Where("person = ?", person).
-    Update("instagram_post_timestamp", date)
+	db.Model(&users).Where("person = ?", person).
+		Update("instagram_post_timestamp", date)
 }
 
 func UpdateIGStoryTimestampDB(db *gorm.DB, person string, date int64) {
-    db.Model(&users).Where("person = ?", person).
-    Update("instagram_story_timestamp", date)
+	db.Model(&users).Where("person = ?", person).
+		Update("instagram_story_timestamp", date)
 }
 
 func UpdateVKTimestampDB(db *gorm.DB, id int64, person string, date int64) {
@@ -226,15 +224,14 @@ func InitDB() *gorm.DB {
 	if err != nil {
 		panic("failed to connect database")
 	}
-    fmt.Printf("%v", reflect.TypeOf(db))
+	fmt.Printf("%v", reflect.TypeOf(db))
 	//defer db.Close()
 	db.LogMode(true)
 
 	// Migrate the schema
 	db.Debug().AutoMigrate(&User{})
-    return db
+	return db
 }
-
 
 func ComposeJSONPayload(s *User, from string) JsonPayload {
 	jsonPayload = JsonPayload{}
@@ -259,5 +256,5 @@ func ComposeJSONPayload(s *User, from string) JsonPayload {
 	jsonPayload.From = from // "vk"
 	//jsonPayload.Files = files
 
-    return jsonPayload
+	return jsonPayload
 }

@@ -1,6 +1,6 @@
-module vk
+module producer
 
-go 1.14
+go 1.15
 
 require (
 	github.com/anaskhan96/soup v1.1.1
@@ -21,6 +21,6 @@ require (
 	moul.io/http2curl v1.0.0 // indirect
 )
 
-replace github.com/wmw9/blossom-reposter/pkg/pubsub => /home/wmw/git/blossom-bot/reposter/pkg/pubsub
+replace github.com/wmw9/blossom-reposter/pkg/pubsub => /Users/wmw/Documents/git/blossom-bot/reposter/pkg/pubsub
 
-replace github.com/wmw9/blossom-reposter/pkg/database => /home/wmw/git/blossom-bot/reposter/pkg/database
+replace github.com/wmw9/blossom-reposter/pkg/database => /Users/wmw/Documents/git/blossom-bot/reposter/pkg/database

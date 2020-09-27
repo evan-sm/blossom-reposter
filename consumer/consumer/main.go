@@ -5,48 +5,48 @@ import (
 	"fmt"
 	"log"
 	"os"
+
 	//"reflect"
 	"time"
 
-	"github.com/wmw9/blossom-reposter/pkg/pubsub"
 	"github.com/wmw9/blossom-reposter/pkg/database"
-
+	"github.com/wmw9/blossom-reposter/pkg/pubsub"
 )
 
 var jsonPayload database.JsonPayload
 
 func main() {
-    consume()
+	consume()
 }
 
 func consume() {
-    c := pubsub.NewClientSocket()
+	c := pubsub.NewClientSocket()
 	c.ClientInit(socketUrl, "Telegram Consumer")
 
-    var err error
-    var msg []byte
+	var err error
+	var msg []byte
 
-    for {
-        if msg, err = c.ClientStart(); err != nil {
-            die("Cannot recv: %s", err.Error())
-        }
+	for {
+		if msg, err = c.ClientStart(); err != nil {
+			die("Cannot recv: %s", err.Error())
+		}
 
 		if err = json.Unmarshal(msg, &jsonPayload); err != nil {
-    		log.Println(err, jsonPayload)
+			log.Println(err, jsonPayload)
 			reportTg(err)
 			die("Can't unmarshal msg: %s", err.Error())
-        }
+		}
 
 		if jsonPayload.RepostTelegramEnabled {
 			repostTg()
-			jsonPayload = database.JsonPayload{}
-		} else {
-			log.Printf("Reposting to Telegram is disabled: %v", jsonPayload.RepostTelegramEnabled)
 		}
-
+		if jsonPayload.RepostMakabaEnabled {
+			repost2ch()
+		}
+		jsonPayload = database.JsonPayload{}
 		log.Println("Sleep for a sec...")
 		time.Sleep(time.Second)
-    }
+	}
 }
 
 func die(format string, v ...interface{}) {
@@ -61,4 +61,3 @@ func failOnError(err error, msg string) {
 		die("Something went wrong")
 	}
 }
-

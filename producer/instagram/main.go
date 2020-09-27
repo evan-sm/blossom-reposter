@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/jinzhu/gorm"
+	"github.com/wmw9/blossom-reposter/pkg/database"
 	"github.com/wmw9/blossom-reposter/pkg/pubsub"
-    "github.com/wmw9/blossom-reposter/pkg/database"
-    "github.com/jinzhu/gorm"
 )
 
 var files []string
@@ -16,18 +16,16 @@ var vkPost database.VKPost
 var s pubsub.ServerSocket
 var db *gorm.DB
 var jsonPayload database.JsonPayload
-
-
 var user []*database.User
-var shortcodeJsonArray []database.ShortcodeJson
-var storyJson []database.StoryJson
-var shortcodeJson database.ShortcodeJson
+var shortcodeJSONArray []database.ShortcodeJSON
+var storyJSON []database.StoryJSON
+var shortcodeJSON database.ShortcodeJSON
 
 func main() {
 	s = pubsub.NewServerSocket()
 	s.ServerInit(socketURL, "IG producer")
 
-    db = database.InitDB()
+	db = database.InitDB()
 
 	for {
 		checkSN()
@@ -36,31 +34,28 @@ func main() {
 	}
 }
 
-
 func checkSN() {
-    users := database.GetUsersDB(db)
-    
-    // Iterate through each person
+	users := database.GetUsersDB(db)
+
+	// Iterate through each person
 	for _, v := range users {
 		log.Printf("Checking %s's instagram...", v.Person)
-		
-        
-        if v.Check_instagram_post {
-			checkInstagramPost(v)
+
+		if v.Check_instagram_post {
+			checkInstagramPost(v)7
 		}
 		if v.Check_instagram_story {
 			checkInstagramStory(v)
 		}
-		
-    }
+
+	}
 }
 
 func clearJSON() {
 	jsonPayload = database.JsonPayload{}
 	files = nil
-	storyJson = nil
+	storyJSON = nil
 }
-
 
 func sendJSONPayload() bool {
 	body, err := json.Marshal(&jsonPayload)
@@ -70,4 +65,3 @@ func sendJSONPayload() bool {
 	s.ServerSend(body)
 	return true
 }
-
