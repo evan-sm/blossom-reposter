@@ -1,15 +1,22 @@
-FROM golang:1.14-alpine3.12 AS build
+FROM golang:1.15-alpine AS build
+
+RUN apk add --update --no-cache tzdata
 
 WORKDIR /app
-COPY ./ /app
-RUN go mod download && go build
+COPY . .
+RUN go mod init producer && CGO_ENABLED=0 go build -ldflags "-s -w"
 
-FROM alpine:3.12
+FROM scratch
 
 ENV TZ Europe/Moscow
-RUN apk add --update --no-cache tzdata  && cp /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-WORKDIR /app
-COPY --from=build /app/vk ./
-##USER 1000:1000
-ENTRYPOINT /app/vk
+COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=build /etc/passwd /etc/passwd
+COPY --from=build /etc/group /etc/group
+COPY --from=build /app/producer /app/producer
+
+# Use an unprivileged user.
+USER 10001:10001
+
+ENTRYPOINT ["/app/producer"]

@@ -9,13 +9,13 @@ import (
 	"github.com/k0kubun/pp"
 	"github.com/parnurzeal/gorequest"
 	"github.com/tidwall/gjson"
-    "github.com/wmw9/blossom-reposter/pkg/database"
+	"github.com/wMw9/rpdb"
 )
 
 // UsersGet used to retrieve status
-func UsersGet(id int64, s string, v *database.User) {
-	clearJSON() // Wipe it from last Unmarshal 
-    jsonPayload = database.ComposeJSONPayload(v, "vk")
+func UsersGet(id int64, s string, v *rpdb.User) {
+	clearJSON() // Wipe it from last Unmarshal
+	jsonPayload = rpdb.ComposeJSONPayload(v, "vk")
 	query := fmt.Sprintf(`{"v": "%v", "fields":"%v", "user_id": "%v", "access_token": "%v"}`,
 		vkAPIVersion, vkUsersGetFields, id, vkAccessTkn)
 	resp, _, errs := gorequest.New().Get(vkUsersGetURL).Query(query).EndStruct(&status) // Get status and unmarshal into struct
@@ -38,19 +38,19 @@ func UsersGet(id int64, s string, v *database.User) {
 	jsonPayload.Type = "status"
 	jsonPayload.Source = fmt.Sprintf("https://vk.com/id%v", jsonPayload.VkPageID)
 	pp.Print(jsonPayload)
-    if sent := sendJSONPayload(); sent {
+	if sent := sendJSONPayload(); sent {
 		log.Printf("Mark it in DB")
-        database.UpdateVKStatusDB(db, id, status.Response[0].Status)
+		rpdb.UpdateVKStatusDB(db, id, status.Response[0].Status)
 	}
 	time.Sleep(5 * time.Second)
 }
 
 // WallGet used to retrieve posts
-func WallGet(id int64, v *database.User) {
+func WallGet(id int64, v *rpdb.User) {
 	var pathSyntax string
 
-	clearJSON() // Wipe it from last Unmarshal 
-    jsonPayload = database.ComposeJSONPayload(v, "vk")
+	clearJSON() // Wipe it from last Unmarshal
+	jsonPayload = rpdb.ComposeJSONPayload(v, "vk")
 
 	// Call VK API wall.get method to retrieve 5 last posts
 	query := fmt.Sprintf(`{"v": "%v", "filter":"%v", "owner_id": "%v", "count":"5", "access_token": "%v"}`,
@@ -84,7 +84,7 @@ func WallGet(id int64, v *database.User) {
 	// Skip cycle if post is a repost.
 	if gjson.Get(js.String(), "copy_history").Exists() {
 		log.Println("Repost. Skip.")
-        database.UpdateVKTimestampDB(db, id, jsonPayload.Person, vkPost.Date)
+		rpdb.UpdateVKTimestampDB(db, id, jsonPayload.Person, vkPost.Date)
 		//updateVkTimestamp(id)
 		return
 	}
@@ -92,7 +92,7 @@ func WallGet(id int64, v *database.User) {
 	// Skip cycle if both js["attachments"] not present and "js["text"]" is empty.
 	if txt := gjson.Get(js.String(), "text").String(); txt == "" && !gjson.Get(js.String(), "attachments").Exists() {
 		log.Println("Skip. js['attachments'] not present and js['text'] is empty.")
-        database.UpdateVKTimestampDB(db, id, jsonPayload.Person, vkPost.Date)
+		rpdb.UpdateVKTimestampDB(db, id, jsonPayload.Person, vkPost.Date)
 		//updateVkTimestamp(id)
 		return
 	}
@@ -113,7 +113,7 @@ func WallGet(id int64, v *database.User) {
 			files = append(files, url) // add .jpg to slice
 		}
 	}
-    log.Printf("\nWallGet: %v\n", jsonPayload)
+	log.Printf("\nWallGet: %v\n", jsonPayload)
 	jsonPayload.Files = files
 	jsonPayload.Timestamp = vkPost.Date
 	jsonPayload.Caption = vkPost.Text
@@ -121,9 +121,9 @@ func WallGet(id int64, v *database.User) {
 	jsonPayload.Source = fmt.Sprintf("https://vk.com/wall%v_%v", vkPost.FromID, vkPost.ID)
 	//pp.Print(vkPost)
 	pp.Print(jsonPayload)
-    if sent := sendJSONPayload(); sent {
-        database.UpdateVKTimestampDB(db, id, jsonPayload.Person, vkPost.Date)
-    }
+	if sent := sendJSONPayload(); sent {
+		rpdb.UpdateVKTimestampDB(db, id, jsonPayload.Person, vkPost.Date)
+	}
 	time.Sleep(5 * time.Second)
 }
 

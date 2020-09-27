@@ -10,26 +10,26 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
-	"github.com/wmw9/blossom-reposter/pkg/database"
-	"github.com/wmw9/blossom-reposter/pkg/pubsub"
+	"github.com/wMw9/rpdb"
+	"github.com/wMw9/rpps"
 )
 
 var files []string
-var status database.Status
-var vkPost database.VKPost
-var s pubsub.ServerSocket
+var status rpdb.Status
+var vkPost rpdb.VKPost
+var s rpps.ServerSocket
 var db *gorm.DB
-var jsonPayload database.JsonPayload
+var jsonPayload rpdb.JsonPayload
 
-var shortcodeJSONArray []database.ShortcodeJSON
-var storyJSON []database.StoryJSON
-var shortcodeJSON database.ShortcodeJSON
+var shortcodeJSONArray []rpdb.ShortcodeJSON
+var storyJSON []rpdb.StoryJSON
+var shortcodeJSON rpdb.ShortcodeJSON
 
 func main() {
-	s = pubsub.NewServerSocket()
+	s = rpps.NewServerSocket()
 	s.ServerInit(socketURL, "VK producer")
 
-	db = database.InitDB()
+	db = rpdb.InitDB()
 
 	go func() {
 		for {
@@ -54,7 +54,7 @@ func main() {
 }
 
 func checkIG() {
-	u := database.GetUsersDB(db)
+	u := rpdb.GetUsersDB(db)
 	for _, v := range u {
 		log.Printf("Checking %s's instagram...", v.Person)
 
@@ -69,7 +69,7 @@ func checkIG() {
 }
 
 func checkVK() {
-	u := database.GetUsersDB(db)
+	u := rpdb.GetUsersDB(db)
 	for _, v := range u {
 		log.Printf("Checking %s's VK...", v.Person)
 		if v.Repost_vk_page_enabled {
@@ -91,9 +91,9 @@ func checkVK() {
 }
 
 func clearJSON() {
-	jsonPayload = database.JsonPayload{}
+	jsonPayload = rpdb.JsonPayload{}
 	files = nil
-	status = database.Status{}
+	status = rpdb.Status{}
 }
 
 func sendJSONPayload() bool {

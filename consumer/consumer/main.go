@@ -9,18 +9,18 @@ import (
 	//"reflect"
 	"time"
 
-	"github.com/wmw9/blossom-reposter/pkg/database"
-	"github.com/wmw9/blossom-reposter/pkg/pubsub"
+	"github.com/wMw9/rpdb"
+	"github.com/wMw9/rpps"
 )
 
-var jsonPayload database.JsonPayload
+var jsonPayload rpdb.JsonPayload
 
 func main() {
 	consume()
 }
 
 func consume() {
-	c := pubsub.NewClientSocket()
+	c := rpps.NewClientSocket()
 	c.ClientInit(socketUrl, "Telegram Consumer")
 
 	var err error
@@ -43,7 +43,7 @@ func consume() {
 		if jsonPayload.RepostMakabaEnabled {
 			repost2ch()
 		}
-		jsonPayload = database.JsonPayload{}
+		jsonPayload = rpdb.JsonPayload{}
 		log.Println("Sleep for a sec...")
 		time.Sleep(time.Second)
 	}

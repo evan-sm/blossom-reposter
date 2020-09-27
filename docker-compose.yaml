@@ -1,7 +1,7 @@
 version: '2.1'
 services:
-  ip:
-    build: ./producer/instagram
+  producer:
+    build: ./producer/producer
     restart: on-failure
     #volumes:
     #  - ./consumer:/app
@@ -14,10 +14,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      rmq:
-        condition: service_healthy
-  mc:
-    build: ./consumer/makaba
+  consumer:
+    build: ./consumer/consumer
     restart: on-failure
     #volumes:
     #  - ./producer:/app
@@ -27,27 +25,6 @@ services:
       - ./.env
         #stdin_open: true
         #tty: true
-    depends_on:
-      db:
-        condition: service_healthy
-      rmq:
-        condition: service_healthy
-  tgc:
-    build: ./consumer/telegram
-    restart: on-failure
-    #volumes:
-    #  - ./producer:/app
-    networks:
-      - backend
-    env_file:
-      - ./.env
-        #stdin_open: true
-        #tty: true
-    depends_on:
-      db:
-        condition: service_healthy
-      rmq:
-        condition: service_healthy
   db:
     image: postgres:12.4-alpine
     restart: unless-stopped
@@ -69,29 +46,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 15
-  rmq:
-    image: rabbitmq:3.8.5-management-alpine
-    restart: unless-stopped
-    env_file:
-      - ./.env
-    networks:
-      - backend
-    #user: "1000:1000"
-    environment:
-      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE}
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
-    volumes:
-      - ./data/rmqdata-dc:/var/lib/rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    healthcheck:
-      test: ["CMD-SHELL", "rabbitmq-diagnostics check_alarms"]
-      interval: 5s
-      timeout: 5s
-      retries: 15
-
 networks:
   backend:
     driver: bridge

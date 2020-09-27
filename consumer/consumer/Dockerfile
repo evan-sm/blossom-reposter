@@ -10,14 +10,14 @@ FROM scratch
 
 ENV TZ Europe/Moscow
 
-COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /etc/passwd /etc/passwd
-COPY --from=builder /etc/group /etc/group
-COPY --from=builder /app/blossom-observer /app/blossom-observer
+COPY --from=build /usr/share/zoneinfo /usr/share/zoneinfo
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=build /etc/passwd /etc/passwd
+COPY --from=build /etc/group /etc/group
+COPY --from=build /app/consumer /app/consumer
 
 # Use an unprivileged user.
 USER 10001:10001
 
-ENTRYPOINT ["/app/blossom-observer"]
+ENTRYPOINT ["/app/consumer"]
 #CMD ["sh", "-c", "tail -f /dev/null"]

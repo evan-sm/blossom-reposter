@@ -14,13 +14,13 @@ import (
 
 	//"github.com/wmw9/blossom-reposter/pkg/pubsub"
 	"github.com/k0kubun/pp"
-	"github.com/wmw9/blossom-reposter/pkg/database"
+	"github.com/wMw9/rpdb"
 	//    "github.com/jinzhu/gorm"
 )
 
-func checkInstagramPost(v *database.User) {
+func checkInstagramPost(v *rpdb.User) {
 	clearJSON() // Wipe it from last Unmarshal
-	jsonPayload = database.ComposeJSONPayload(v, "ig")
+	jsonPayload = rpdb.ComposeJSONPayload(v, "ig")
 	jsonPayload.Type = "post"
 	pp.Println(jsonPayload)
 	log.Printf("Checking %v's profile json for posts...", jsonPayload.InstagramUsername)
@@ -61,16 +61,16 @@ func checkInstagramPost(v *database.User) {
 	pp.Println(jsonPayload)
 	if sent := sendJSONPayload(); sent {
 		log.Printf("Mark it in DB")
-		database.UpdateIGPostTimestampDB(db, jsonPayload.Person, jsonPayload.Timestamp)
+		rpdb.UpdateIGPostTimestampDB(db, jsonPayload.Person, jsonPayload.Timestamp)
 	}
 	log.Printf("Sleep for a sec")
 	time.Sleep(1 * time.Second)
 
 }
 
-func checkInstagramStory(v *database.User) {
+func checkInstagramStory(v *rpdb.User) {
 	clearJSON() // Wipe it from last Unmarshal
-	jsonPayload = database.ComposeJSONPayload(v, "ig")
+	jsonPayload = rpdb.ComposeJSONPayload(v, "ig")
 
 	jsonPayload.Type = "story"
 	//jsonPayload.Caption = ""
@@ -134,7 +134,7 @@ func checkInstagramStory(v *database.User) {
 	pp.Println(jsonPayload)
 	if sent := sendJSONPayload(); sent {
 		log.Printf("Mark it in DB")
-		database.UpdateIGStoryTimestampDB(db, jsonPayload.Person, jsonPayload.Timestamp)
+		rpdb.UpdateIGStoryTimestampDB(db, jsonPayload.Person, jsonPayload.Timestamp)
 	}
 	time.Sleep(5 * time.Second)
 
