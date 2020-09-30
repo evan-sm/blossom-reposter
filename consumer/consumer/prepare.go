@@ -23,7 +23,7 @@ func prepareBase(board string, thread string) map[string]io.Reader {
 		log.Println("Got post from VK")
 		switch jsonPayload.Type {
 		case "status":
-			comment = fmt.Sprintf("✏️[b]VK статус изменился:[/b] %v\n\n[sup]%v ⛓[/sup]", jsonPayload.Caption, jsonPayload.Source)
+			comment = fmt.Sprintf("✏️[b]VK статус изменился:[/b] %v", jsonPayload.Caption)
 			log.Printf("Caption: \"%v\"", comment)
 		case "post":
 			comment = fmt.Sprintf("[sup]%v ⛓[/sup]\n\n", jsonPayload.Source)
@@ -46,7 +46,7 @@ func prepareBase(board string, thread string) map[string]io.Reader {
 		log.Println("Got post from IG")
 		switch jsonPayload.Type {
 		case "story":
-			comment = fmt.Sprintf("[sup]%v ⛓[/sup]\n\n", jsonPayload.Source)
+			comment = ""
 			if jsonPayload.Caption != "" {
 				caption = strings.Replace(jsonPayload.Caption, "\n", "\n> ", -1)
 				caption = strings.Replace(caption, "\n> ⠀\n> ", "\n\n> ", -1)
