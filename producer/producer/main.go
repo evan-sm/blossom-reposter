@@ -33,19 +33,25 @@ func main() {
 
 	go func() {
 		for {
-			time.Sleep(3 * time.Second)
-			checkVK()
-			log.Printf("⏳ Next run in 1 m ...")
-			time.Sleep(60 * time.Second)
-		}
-	}()
-
-	go func() {
-		for {
 			time.Sleep(20 * time.Second)
+
+			checkVK()
 			checkIG()
-			log.Printf("⏳ Next run in 12 m ...")
-			time.Sleep(720 * time.Second)
+			log.Printf("⏳ Next run is VK in 3 m ...\n")
+			time.Sleep(180 * time.Second)
+			checkVK()
+			log.Printf("⏳ Next run is VK in 3 m ...\n")
+			time.Sleep(180 * time.Second)
+			checkVK()
+			log.Printf("⏳ Next run is VK in 3 m ...\n")
+			time.Sleep(180 * time.Second)
+			checkVK()
+			log.Printf("⏳ Next run is VK in 3 m ...\n")
+			time.Sleep(180 * time.Second)
+			checkVK()
+			log.Printf("⏳ Next run is IG in 3 m ...\n")
+
+			time.Sleep(20 * time.Second)
 		}
 	}()
 
