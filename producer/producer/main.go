@@ -98,6 +98,7 @@ func checkVK() {
 
 func clearJSON() {
 	jsonPayload = rpdb.JsonPayload{}
+	jsonPayload.Caption = ""
 	files = nil
 	status = rpdb.Status{}
 }

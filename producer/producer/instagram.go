@@ -73,7 +73,7 @@ func checkInstagramStory(v *rpdb.User) {
 	jsonPayload = rpdb.ComposeJSONPayload(v, "ig")
 
 	jsonPayload.Type = "story"
-	//jsonPayload.Caption = ""
+	jsonPayload.Caption = ""
 
 	jsonPayload.Source = fmt.Sprintf("https://instagram.com/stories/%v", jsonPayload.InstagramUsername)
 	log.Printf("Checking %v's stories... person: %v; timestamp: %v", jsonPayload.InstagramUsername, jsonPayload.Person, jsonPayload.InstagramStoryTimestamp)
