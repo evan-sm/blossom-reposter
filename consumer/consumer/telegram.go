@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
-    "time"
-    "net/http"
+	"time"
 
 	"github.com/k0kubun/pp"
 	"github.com/parnurzeal/gorequest"
@@ -26,7 +26,6 @@ type SendMessagePayload struct {
 	ParseMode             string `json:"parse_mode"`
 	DisableWebPagePreview bool   `json:"disable_web_page_preview"`
 }
-
 
 func reportTg(e interface{}) {
 	log.Printf("%v", e)
@@ -90,7 +89,7 @@ func repostTg() {
 			if jsonPayload.Caption == "" {
 				caption = fmt.Sprintf("🔗<a href=\"%v\">Стрим запустился!</a>", jsonPayload.Source)
 			} else {
-                caption = fmt.Sprintf("Заголовок стрима: \"%v\"\n\n🔗<a href=\"%v\">Стрим запустился!</a>", caption, jsonPayload.Source)
+				caption = fmt.Sprintf("Заголовок стрима: \"%v\"\n\n🔗<a href=\"%v\">Стрим запустился!</a>", caption, jsonPayload.Source)
 			}
 			sendMediaGroup(caption)
 		}
@@ -121,7 +120,7 @@ func sendMediaGroup(caption string) {
 	url := fmt.Sprintf("https://api.telegram.org/bot%v/sendMediaGroup", tgBotTkn)
 
 	resp, body, errs := gorequest.New().Post(url).Send(payload).
-        Retry(3, 5 * time.Second, http.StatusBadRequest, http.StatusInternalServerError).End()
+		Retry(3, 5*time.Second, http.StatusBadRequest, http.StatusInternalServerError).End()
 	log.Printf("%v\n%v\n%v", errs, resp, body)
 }
 
