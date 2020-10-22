@@ -17,6 +17,9 @@ func getCatalog() ([]byte, string, string) {
 	case "germanika":
 		keyword = "германик"
 		board = "fag"
+	case "cyberbabe":
+		keyword = "MELLSTROY"
+		board = "fag"
 	case "linyasha":
 		keyword = "самых ламповых"
 		board = "fag"
