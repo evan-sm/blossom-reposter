@@ -34,7 +34,7 @@ func getCatalog() ([]byte, string, string) {
 		keyword = `навальный \ролл /ролл`
 		board = "test"
 	}
-	url := fmt.Sprintf("https://2ch.hk/%v/threads.json", board)
+	url := fmt.Sprintf("https://2ch.hk/%v/catalog.json", board)
 	resp, err := http.Get(url)
 	if err != nil {
 		reportTg(err)
