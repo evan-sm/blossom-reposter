@@ -40,7 +40,7 @@ func getCatalog() ([]byte, string, string) {
 		keyword = `навальный \ролл /ролл`
 		board = "test"
 	}
-	url := fmt.Sprintf("https://2ch.hk/%v/catalog.json", board)
+	url := fmt.Sprintf("https://2ch.hk/%v/threads.json", board)
 	resp, err := http.Get(url)
 	if err != nil {
 		reportTg(err)
@@ -56,7 +56,7 @@ func findThread() (string, string) {
 	threads := gjson.GetBytes(catalogJson, `threads.#.subject`)
 	var ind int // Thread index
 	for k, v := range threads.Array() {
-		if strings.Contains(strings.ToLower(v.String()), keyword) == true {
+		if strings.Contains(strings.ToLower(v.String()), strings.ToLower(keyword)) == true {
 			fmt.Println("Thread found; Index is:", k, "; subject is:", v)
 			ind = k
 		}
