@@ -1,6 +1,3 @@
-<h1 align="center">
-  <img src="https://raw.githubusercontent.com/wMw9/makaba-reposter/master/assets/img/post_sample2.png" alt="Blossom Reposter">
-</h1>
 <p align="center">Monitors & reposts activities from popular social networks to telegram and /fag/</p>
 <h1 align="center">Blossom-Reposter</h1>
 Best friend for telegram channel owners.
