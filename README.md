@@ -1,3 +1,6 @@
+## Scheme
+
+<img src="https://raw.githubusercontent.com/wMw9/makaba-reposter/master/assets/img/reposter_scheme.svg" alt="Reposter Scheme">
 <p align="center">Monitors & reposts activities from popular social networks to telegram and /fag/</p>
 <h1 align="center">Blossom-Reposter</h1>
 Best friend for telegram channel owners.
@@ -8,10 +11,6 @@ Managing your telegram channels and stalking your waifus has never been as fun n
 * Announce when streamer goes online using Twitch WebHooks
 * Repost these activities to /fag/ or telegram channel for archive purposes
 * more to come
-
-## Scheme
-
-<img src="https://raw.githubusercontent.com/wMw9/makaba-reposter/master/assets/img/reposter_scheme.svg" alt="Reposter Scheme">
 
 ## Installation
 
